@@ -179,7 +179,7 @@ void *handle_client(void *arg)
 
 int main(int argc, char **argv)
 {
-    sqlite3 *db;
+    sqlite3 *db = NULL;
     if (argc != 2)
     {
         printf("Usage: %s <port>\n", argv[0]);
@@ -201,8 +201,9 @@ int main(int argc, char **argv)
     serv_addr.sin_port = htons(port);
 
     /* Db */
-    void create_table(db);
-    void insert_into_db(db);
+    create_table(db);
+    insert_into_db(db);
+    get_from_db_users(db);
 
     /* Ignore pipe signals */
     signal(SIGPIPE, SIG_IGN);

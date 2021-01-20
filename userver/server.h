@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <signal.h>
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName);
+int callback(void *NotUsed, int argc, char **argv, char **azColName);
 void create_table(sqlite3 *db);
 void insert_into_db(sqlite3 *db);
+void get_from_db_users(sqlite3 *db);

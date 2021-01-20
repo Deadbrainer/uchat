@@ -7,7 +7,7 @@ void insert_into_db(sqlite3 *db)
     char *sql;
 
     /* Open database */
-    rc = sqlite3_open("test.db", &db);
+    rc = sqlite3_open("uchat.db", &db);
 
     if (rc)
     {

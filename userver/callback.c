@@ -1,6 +1,6 @@
 #include "server.h"
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName)
+int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
     int i;
     for (i = 0; i < argc; i++)

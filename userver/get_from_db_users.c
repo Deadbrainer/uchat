@@ -1,13 +1,14 @@
 #include "server.h"
 
-void create_table(sqlite3 *db)
+void get_from_db_users(sqlite3 *db)
 {
     char *zErrMsg = 0;
     int rc;
     char *sql;
+    const char *data = "Callback function called";
 
     /* Open database */
-    rc = sqlite3_open("test.db", &db);
+    rc = sqlite3_open("uchat.db", &db);
 
     if (rc)
     {
@@ -15,17 +16,14 @@ void create_table(sqlite3 *db)
     }
     else
     {
-        fprintf(stdout, "Opened database successfully\n");
+        fprintf(stderr, "Opened database successfully\n");
     }
 
     /* Create SQL statement */
-    sql = "CREATE TABLE USERS("
-          "ID INT PRIMARY KEY     NOT NULL,"
-          "NAME           TEXT    NOT NULL,"
-          "PASSWORD       TEXT    NOT NULL);";
+    sql = "SELECT * from USERS";
 
     /* Execute SQL statement */
-    rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, callback, (void *)data, &zErrMsg);
 
     if (rc != SQLITE_OK)
     {
@@ -34,7 +32,7 @@ void create_table(sqlite3 *db)
     }
     else
     {
-        fprintf(stdout, "Table created successfully\n");
+        fprintf(stdout, "Operation done successfully\n");
     }
     sqlite3_close(db);
 }
