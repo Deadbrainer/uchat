@@ -13,6 +13,7 @@ typedef struct
     int sockfd;
     int uid;
     char name[32];
+    char password[32];
 } client_t;
 
 client_t *clients[MAX_CLIENTS];
@@ -111,7 +112,10 @@ void send_message(char *s, int uid)
 void *handle_client(void *arg)
 {
     char buff_out[BUFFER_SZ];
+
     char name[32];
+    char password[32];
+
     int leave_flag = 0;
 
     cli_count++;
@@ -120,18 +124,34 @@ void *handle_client(void *arg)
     // Name
     if (recv(cli->sockfd, name, 32, 0) <= 0 || strlen(name) < 2 || strlen(name) >= 32 - 1)
     {
-        printf("Didn't enter the name.\n");
+        printf("Havent entered a name.\n");
         leave_flag = 1;
     }
     else
     {
         strcpy(cli->name, name);
         sprintf(buff_out, "%s has joined\n", cli->name);
+
         printf("%s", buff_out);
+
+        bzero(buff_out, BUFFER_SZ); // clear buff_out
         send_message(buff_out, cli->uid);
     }
 
-    bzero(buff_out, BUFFER_SZ);
+    bzero(buff_out, BUFFER_SZ); // clear buff_out
+
+    if (recv(cli->sockfd, password, 32, 0) <= 0 || strlen(password) < 2 || strlen(password) >= 32 - 1)
+    {
+        printf("Havent entered a password\n");
+        leave_flag = 1;
+    }
+    else
+    {
+        strcpy(cli->password, password);
+        sprintf(buff_out, "%s is an entered password\n", cli->password);
+    }
+
+    bzero(buff_out, BUFFER_SZ); // clear buff_out
 
     while (1)
     {
