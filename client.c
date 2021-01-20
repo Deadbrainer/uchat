@@ -13,7 +13,6 @@
 
 // Global variables
 
-
 void str_overwrite_stdout()
 {
 	printf("%s", "> ");
@@ -37,8 +36,9 @@ void str_trim_lf(char *arr, int length)
 //     flag = 1;
 // }
 
-void send_msg_handler(int sockfd, char* name) {
-  char message[LENGTH] = {};
+void send_msg_handler(int sockfd, char *name)
+{
+	char message[LENGTH] = {};
 	char buffer[LENGTH + 32] = {};
 
 	while (1)
@@ -48,9 +48,7 @@ void send_msg_handler(int sockfd, char* name) {
 		str_trim_lf(message, LENGTH);
 
 		if (strcmp(message, "exit") == 0)
-		{
 			break;
-		}
 		else
 		{
 			sprintf(buffer, "%s: %s\n", name, message);
@@ -58,13 +56,13 @@ void send_msg_handler(int sockfd, char* name) {
 		}
 
 		bzero(message, LENGTH);
-    bzero(buffer, LENGTH + 32);
-  }
-  //catch_ctrl_c_and_exit(2, flag);
+		bzero(buffer, LENGTH + 32);
+	}
+	//catch_ctrl_c_and_exit(2, flag);
 }
 
-
-void recv_msg_handler(int sockfd) {
+void recv_msg_handler(int sockfd)
+{
 	char message[LENGTH] = {};
 	while (1)
 	{
@@ -86,7 +84,8 @@ void recv_msg_handler(int sockfd) {
 	}
 }
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
 
 	//volatile sig_atomic_t flag = 0;
 	int sockfd = 0;
@@ -94,8 +93,8 @@ int main(int argc, char **argv){
 
 	char password[32];
 
-
-	if(argc != 2){
+	if (argc != 2)
+	{
 		printf("Usage: %s <port>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
@@ -106,12 +105,12 @@ int main(int argc, char **argv){
 	//signal(SIGINT, catch_ctrl_c_and_exit);
 
 	printf("Please enter your name: ");
-  	fgets(name, 32, stdin);
-  	str_trim_lf(name, strlen(name));
+	fgets(name, 32, stdin);
+	str_trim_lf(name, strlen(name));
 
 	printf("Please enter your password: ");
-  	fgets(password, 32, stdin);
-  	str_trim_lf(name, strlen(name));
+	fgets(password, 32, stdin);
+	str_trim_lf(name, strlen(name));
 
 	if (strlen(name) > 32 || strlen(name) < 2)
 	{
@@ -119,7 +118,8 @@ int main(int argc, char **argv){
 		return EXIT_FAILURE;
 	}
 
-	if (strlen(password) > 32 || strlen(password) < 2){
+	if (strlen(password) > 32 || strlen(password) < 2)
+	{
 		printf("Password must be less than 30 and more than 2 characters.\n");
 		return EXIT_FAILURE;
 	}
@@ -128,14 +128,14 @@ int main(int argc, char **argv){
 
 	/* Socket settings */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(ip);
-    server_addr.sin_port = htons(port);
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = inet_addr(ip);
+	server_addr.sin_port = htons(port);
 
-
-    // Connect to Server
-    int err = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-    if (err == -1) {
+	// Connect to Server
+	int err = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+	if (err == -1)
+	{
 		printf("ERROR: connect\n");
 		return EXIT_FAILURE;
 	}
@@ -149,13 +149,15 @@ int main(int argc, char **argv){
 	printf("=== WELCOME TO THE CHATROOM ===\n");
 
 	pthread_t send_msg_thread;
-  	if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
+	if (pthread_create(&send_msg_thread, NULL, (void *)send_msg_handler, NULL) != 0)
+	{
 		printf("ERROR: pthread\n");
-    	return EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
 
 	pthread_t recv_msg_thread;
-  	if (pthread_create(&recv_msg_thread, NULL, (void *) recv_msg_handler, NULL) != 0) {
+	if (pthread_create(&recv_msg_thread, NULL, (void *)recv_msg_handler, NULL) != 0)
+	{
 		printf("ERROR: pthread\n");
 		return EXIT_FAILURE;
 	}
@@ -164,7 +166,7 @@ int main(int argc, char **argv){
 	// 	if(flag){
 	// 		printf("\nBye\n");
 	// 		break;
-    // }
+	// }
 	// }
 
 	close(sockfd);
