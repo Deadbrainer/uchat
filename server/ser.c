@@ -167,6 +167,7 @@ void *recvmg(void *client_sock)
 
             insert_into_db(db, get[0], get[1]);
 
+            get_from_db_users(db);
             //get_struct(&R, 1);
         default:
             send_everyone(msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
@@ -174,7 +175,7 @@ void *recvmg(void *client_sock)
 
         count_to_2++;
     }
-    get_from_db_users(db);
+
     return NULL; // to silence warning
 } // should not return anything
 

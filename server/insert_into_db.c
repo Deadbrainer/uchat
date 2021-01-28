@@ -2,7 +2,7 @@
 
 void insert_into_db(sqlite3 *db, char *name, char *password)
 {
-
+    static int count_id = 1;
     sqlite3_stmt *stmt;
     int rv = SQLITE_OK;
 
@@ -18,7 +18,7 @@ void insert_into_db(sqlite3 *db, char *name, char *password)
     // time(&rawtime);
     // timeinfo = localtime(&rawtime);
 
-    rv = sqlite3_prepare_v2(db, "insert into USERS values(?, ?);", -1, &stmt, NULL);
+    rv = sqlite3_prepare_v2(db, "insert into USERS values(?, ?, ?);", -1, &stmt, NULL);
     if (rv != SQLITE_OK)
     {
         mx_printstr("Pizda\n");
@@ -26,9 +26,10 @@ void insert_into_db(sqlite3 *db, char *name, char *password)
 
     mx_error_sqlite(rv, "insert USERS into db");
 
-    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 1, count_id);
+    sqlite3_bind_text(stmt, 2, name, -1, SQLITE_STATIC);
     // sqlite3_bind_text(stmt, 2, user->login, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, password, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, password, -1, SQLITE_STATIC);
     // sqlite3_bind_text(stmt, 4, user->token, -1, SQLITE_STATIC);
     // sqlite3_bind_int64(stmt, 5, user->date);
     // sqlite3_bind_text(stmt, 6, user->desc, -1, SQLITE_STATIC);
@@ -37,5 +38,6 @@ void insert_into_db(sqlite3 *db, char *name, char *password)
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     sqlite3_close(db);
+    count_id++;
     // get_id_user(db, user);
 }

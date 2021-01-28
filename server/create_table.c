@@ -20,7 +20,7 @@ void create_table(sqlite3 *db)
 
     /* Create SQL statement */
     sql = "CREATE TABLE IF NOT EXISTS USERS("
-        //   "ID INT PRIMARY KEY     NOT NULL,"
+          "ID             INT      NOT NULL,"
           "NAME           TEXT    NOT NULL,"
           "PASSWORD       TEXT    NOT NULL);";
 
