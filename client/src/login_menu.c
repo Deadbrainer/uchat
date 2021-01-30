@@ -1,7 +1,9 @@
 #include "../inc/uchat.h"
 
-void button_clicked(GtkWidget *button, gpointer data, char *login_text, char *password_text) // TODO: THIS
+void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
 {
+    char *login_text;
+    char *password_text;
     login_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
     password_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
     char *to_send = mx_strjoin(login_text, " ");
@@ -22,8 +24,6 @@ void login_menu()
     GtkWidget *hbox1, *hbox2, *vbox;
     GtkWidget *reg_button;
 
-    char *login_text;
-    char *password_text;
     // Window creation
     log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(log_window, -1, -1, FALSE, 2, "Uchat Log In");
@@ -43,9 +43,9 @@ void login_menu()
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE); //* makes password hidden
 
     enter_button = gtk_button_new_with_label("Login");
-    g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(button_clicked), username_entry, login_text, password_text);
+    g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(button_clicked), username_entry);
 
-        /* Рома: мы не настолько продвинутые (51 line)
+    /* Рома: мы не настолько продвинутые (51 line)
     button_check = gtk_check_button_new_with_label("Remember password?"); // TODO: This, without listener BTW */
 
     //button listener
