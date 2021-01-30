@@ -1,29 +1,32 @@
 #include "server.h"
 
-t_list *get_usernames_from_db(sqlite3 *db)
-{
-    t_list *names = NULL;
-    sqlite3_stmt *stmt;
+t_list* get_names(sqlite3* db) {
+    sqlite3_stmt *res;
 
     int rc = sqlite3_open("uchat.db", &db);
 
-    if (rc != SQLITE_OK)
-    {
-
+    if (rc != SQLITE_OK) {
+        
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-    }
-    rc = sqlite3_prepare_v2(db, "SELECT NAME FROM USERS", -1, &stmt, 0);
-
-    while (sqlite3_step(stmt) == SQLITE_ROW)
-    {
-        // const unsigned char *a = sqlite3_column_text(stmt, 0);
-        // printf("%s\n", a);
-        //mx_push_back(&names, (void *)sqlite3_column_text(stmt, 0));
+        
+        return NULL;
     }
 
-    sqlite3_finalize(stmt);
+    char* sql = "SELECT name FROM USERS";
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+
+    t_list* ss = NULL;
+
+    while (sqlite3_step(res) == SQLITE_ROW) {
+
+        char* a = (char*)sqlite3_column_text(res, 0);
+
+        mx_push_back(&ss, strdup(a));
+    }
+
+    sqlite3_finalize(res);
     sqlite3_close(db);
 
-    return names;
+    return ss;
 }

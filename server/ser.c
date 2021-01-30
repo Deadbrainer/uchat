@@ -137,13 +137,28 @@ void *recvmg(void *client_sock)
         {
         case 0:
             name = get[0];
-            insert_into_db_users(db, get[0], get[1]);
-            get_from_db_users(db);
-            t_list *names = get_usernames_from_db(db);
-            for (t_list *a = names; a != NULL; a = a->next)
-            {
-                printf("name: %s\n", a->data);
+            //get_from_db_users(db);
+
+            t_list *users = get_usernames_from_db(db);
+
+            int error = 0;
+
+            for (t_list* a = users; a != NULL; a = a->next) {
+                if (mx_strcmp(get[0], a->data) == 0) {
+
+                    if (send(sock, false, sizeof(false), 0) < 0)
+                    {
+                        fprintf(stderr, "sending failure\n");
+                    }
+                    count_to_2--;
+                    error = 1;
+                    break;
+                }
             }
+            if (!error) {
+                insert_into_db_users(db, get[0], get[1]);
+            }
+            
             break;
         default:
             insert_into_db_message(db, name, msg);
