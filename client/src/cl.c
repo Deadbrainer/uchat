@@ -1,10 +1,4 @@
-#include <sys/socket.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <pthread.h>
-#include "../../libmx/inc/libmx.h"
+
 #include "../inc/uchat.h"
 
 // char msg[500];
@@ -20,6 +14,20 @@ void get_array(char **array, int check)
     else
     {
         *array = n;
+    }
+}
+
+void get_sockid(int *sockid, int check)
+{ // to an array from main
+    static int n;
+
+    if (check)
+    {
+        n = *sockid;
+    }
+    else
+    {
+        *sockid = n;
     }
 }
 
@@ -93,26 +101,10 @@ int main(int argc, char *argv[])
 
     pthread_create(&recvt, NULL, (void *)recvmg, &sock); // client thread which is always waiting for a message
 
+    get_sockid(&sock, 1);
     // gtk windows
     login_menu();
     gtk_main();
-
-    char client_name[32];
-
-    printf("Please enter your name: ");
-    fgets(client_name, 32, stdin);
-    str_trim_lf(client_name, strlen(client_name));
-
-    char client_password[32];
-
-    printf("Please enter your passsword: ");
-    fgets(client_password, 32, stdin);
-    str_trim_lf(client_password, strlen(client_password));
-
-    char *to_send = mx_strjoin(client_name, " ");
-    to_send = mx_strjoin(to_send, client_password);
-
-    send(sock, to_send, mx_strlen(to_send), 0); // MY OWN
 
     //read a message from stdin (console)
     while (fgets(msg, 500, stdin) > 0)

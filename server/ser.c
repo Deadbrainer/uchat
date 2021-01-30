@@ -138,6 +138,7 @@ void *recvmg(void *client_sock)
         case 0:
             name = get[0];
             insert_into_db_users(db, get[0], get[1]);
+            get_from_db_users(db);
             t_list *names = get_usernames_from_db(db);
             for (t_list *a = names; a != NULL; a = a->next)
             {

@@ -2,14 +2,21 @@
 
 void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
 {
-    char *login_text;
-    char *password_text;
+    const char *login_text;
+    const char *password_text;
+    int sock = 0;
+    get_sockid(&sock, 0);
+    fprintf(stderr, "%d\n", sock);
     login_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
     password_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
     char *to_send = mx_strjoin(login_text, " ");
     to_send = mx_strjoin(to_send, password_text);
 
-    send(sock, to_send, mx_strlen(to_send), 0);
+    if (send(sock, to_send, mx_strlen(to_send), 0) < 0)
+    {
+        fprintf(stderr, "sending failure\n");
+    }
+    //send(sock, to_send, mx_strlen(to_send), 0);
     /*if (strcmp(password_text, password) == 0)
         printf("Access granted!\n");
     else
@@ -20,7 +27,7 @@ void login_menu()
 {
     GtkWidget *username_label, *password_label;
     GtkWidget *username_entry, *password_entry;
-    GtkWidget *enter_button, *button_check;
+    GtkWidget *enter_button;
     GtkWidget *hbox1, *hbox2, *vbox;
     GtkWidget *reg_button;
 

@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include "../../libmx/inc/libmx.h"
 
 GtkWidget *log_window;
 GtkWidget *reg_window;
@@ -47,3 +52,5 @@ void reg_menu();
 
 //Closes whole application
 void closeApp(GtkWidget *window, gpointer data);
+
+void get_sockid(int *sockid, int check);
