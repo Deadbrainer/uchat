@@ -1,6 +1,6 @@
 #include "server.h"
 
-void insert_into_db(sqlite3 *db, char *name, char *password)
+void insert_into_db_users(sqlite3 *db, char *name, char *password)
 {
     static int count_id = 1;
     sqlite3_stmt *stmt;
@@ -12,19 +12,11 @@ void insert_into_db(sqlite3 *db, char *name, char *password)
         exit(-1);
     }
 
-    // time_t rawtime;
-    // struct tm* timeinfo;
-
-    // time(&rawtime);
-    // timeinfo = localtime(&rawtime);
-
     rv = sqlite3_prepare_v2(db, "insert into USERS values(?, ?, ?);", -1, &stmt, NULL);
     if (rv != SQLITE_OK)
     {
-        mx_printstr("Pizda\n");
+        mx_printstr("Prepare error in USERS\n");
     }
-
-    mx_error_sqlite(rv, "insert USERS into db");
 
     sqlite3_bind_int(stmt, 1, count_id);
     sqlite3_bind_text(stmt, 2, name, -1, SQLITE_STATIC);
@@ -34,10 +26,8 @@ void insert_into_db(sqlite3 *db, char *name, char *password)
     // sqlite3_bind_int64(stmt, 5, user->date);
     // sqlite3_bind_text(stmt, 6, user->desc, -1, SQLITE_STATIC);
 
-    // mx_error_sqlite(sqlite3_step(stmt), "insert user into db");
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     sqlite3_close(db);
     count_id++;
-    // get_id_user(db, user);
 }

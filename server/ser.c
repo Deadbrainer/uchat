@@ -85,13 +85,7 @@ typedef struct f
 
 void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, int clients_GLOBAL[], int *n_GLOBAL)
 {
-    // int i;
-
     pthread_mutex_lock(mutex_GLOBAL); // so that different threads didnt do that at one time (might crash)
-
-    // mx_printstr("The quantity of clients is: ");
-    // mx_printint(*n_GLOBAL);
-    // mx_printstr("\n");
 
     for (int i = 0; i < *n_GLOBAL; i++)
     {
@@ -104,18 +98,6 @@ void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, int clien
         }
     }
 
-    // for (t_list* i = *clients_GLOBAL; i != NULL; i = i->next) {
-
-    //     mx_printstr("SockId is: ");
-    //     mx_printint(*((int*)i->data));
-    //     mx_printstr("\n");
-
-    //     if (*((int*)i->data) != sock) {
-    //         if (send(*((int*)i->data), msg, strlen(msg), 0) < 0) {
-    //             fprintf(stderr, "sending failure\n");
-    //         }
-    //     }
-    // }
     pthread_mutex_unlock(mutex_GLOBAL);
 }
 
@@ -124,6 +106,8 @@ void *recvmg(void *client_sock)
     int sock = *((int *)client_sock); // so that is happening))
     char msg[500];
     int len;
+    char *send_msg = malloc(500);
+    char *name = NULL;
 
     static int n_GLOBAL;
     get_N(&n_GLOBAL, 0);
@@ -133,46 +117,42 @@ void *recvmg(void *client_sock)
 
     static int clients_GLOBAL[20];
 
-    //static t_list* clients_GLOBAL = NULL;
     get_arr(clients_GLOBAL, 0);
-    //clients_GLOBAL = get_list(0, 0);
 
     static sqlite3 *db;
     getDataBase(db, 0);
 
     int count_to_2 = 0;
-
-    // client* R = malloc(sizeof(client));
+    char **get;
 
     while ((len = recv(sock, msg, 500, 0)) > 0)
     {
-        //mx_printstr("GOT MESSAGE\n");
         msg[len] = '\0';
 
-        char **get;
-
+        if (count_to_2 == 0)
+        {
+            get = mx_strsplit(msg, ' ');
+        }
         switch (count_to_2)
         {
         case 0:
-            //R->name_password = mx_strdup(msg);
-            get = mx_strsplit(msg, ' ');
-
-            // mx_printstr("Name: ");
-            // mx_printstr(get[0]);
-            // mx_printstr("\n");
-
-            // mx_printstr("Password: ");
-            // mx_printstr(get[1]);
-            // mx_printstr("\n");
-
-            insert_into_db(db, get[0], get[1]);
-
-            get_from_db_users(db);
-            //get_struct(&R, 1);
+            name = get[0];
+            insert_into_db_users(db, get[0], get[1]);
+            t_list *names = get_usernames_from_db(db);
+            for (t_list *a = names; a != NULL; a = a->next)
+            {
+                printf("name: %s\n", a->data);
+            }
+            break;
         default:
-            send_everyone(msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
+            insert_into_db_message(db, name, msg);
+            //get_from_db_messages(db);
+            strcpy(send_msg, name);
+            strcat(send_msg, ":  ");
+            strcat(send_msg, msg);
+            send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
         }
-
+        memset(msg, strlen(msg), '\0');
         count_to_2++;
     }
 
