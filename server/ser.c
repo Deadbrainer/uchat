@@ -66,33 +66,34 @@ void get_arr(int d[], int check)
     }
 }
 
-typedef struct f
-{
-    char *name_password;
-} client;
+void get_list(t_list** x, int check) {
+    static t_list* n;
 
-// static client* get_struct(client** x, int check) {
-//     static client* n = NULL;
+    if(check) {
+        n = *x;
+    } else {
+        *x = n;
+    }
+}
 
-//     if(check) {
-//         n = *x;
-//     } else {
-//         *x = n;
-//     }
-
-//     return n;
-// }
-
-void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, int clients_GLOBAL[], int *n_GLOBAL)
+void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, t_list** ids)
 {
     pthread_mutex_lock(mutex_GLOBAL); // so that different threads didnt do that at one time (might crash)
 
-    for (int i = 0; i < *n_GLOBAL; i++)
-    {
-        if (clients_GLOBAL[i] != sock)
-        {
-            if (send(clients_GLOBAL[i], msg, strlen(msg), 0) < 0)
-            {
+    // for (int i = 0; i < *n_GLOBAL; i++)
+    // {
+    //     if (clients_GLOBAL[i] != sock)
+    //     {
+    //         if (send(clients_GLOBAL[i], msg, strlen(msg), 0) < 0)
+    //         {
+    //             fprintf(stderr, "sending failure\n");
+    //         }
+    //     }
+    // }
+
+    for (t_list* a = *ids; a != NULL; a = a->next) {
+        if (mx_atoi((char*)(a->data)) != sock) {
+            if (send(mx_atoi((char*)(a->data)), msg, strlen(msg), 0) < 0) {
                 fprintf(stderr, "sending failure\n");
             }
         }
@@ -109,15 +110,26 @@ void *recvmg(void *client_sock)
     char *send_msg = malloc(500);
     char *name = NULL;
 
-    static int n_GLOBAL;
-    get_N(&n_GLOBAL, 0);
+    // static int n_GLOBAL;
+    // get_N(&n_GLOBAL, 0);
 
     static pthread_mutex_t mutex_GLOBAL;
     get_mutex(&mutex_GLOBAL, 0);
 
-    static int clients_GLOBAL[20];
+    // static int clients_GLOBAL[20];
 
-    get_arr(clients_GLOBAL, 0);
+    // get_arr(clients_GLOBAL, 0);
+
+    t_list* ids = NULL;
+    get_list(&ids, 0);
+
+    // printf("Crash here?\n");
+
+    // for (t_list* a = ids; a != NULL; a = a->next) {
+    //     printf("%s\n", a->data);
+    // }
+
+    // printf("Nope\n");
 
     static sqlite3 *db;
     getDataBase(db, 0);
@@ -143,10 +155,14 @@ void *recvmg(void *client_sock)
 
             int error = 0;
 
+            bool e;
+
             for (t_list* a = users; a != NULL; a = a->next) {
                 if (mx_strcmp(get[0], a->data) == 0) {
 
-                    if (send(sock, false, sizeof(false), 0) < 0)
+                    e = false;
+
+                    if (send(sock, &e, sizeof(e), 0) < 0)
                     {
                         fprintf(stderr, "sending failure\n");
                     }
@@ -157,6 +173,12 @@ void *recvmg(void *client_sock)
             }
             if (!error) {
                 insert_into_db_users(db, get[0], get[1]);
+                e = true;
+
+                if (send(sock, &e, sizeof(e), 0) < 0)
+                {
+                    fprintf(stderr, "sending failure\n");
+                }
             }
             
             break;
@@ -166,7 +188,8 @@ void *recvmg(void *client_sock)
             strcpy(send_msg, name);
             strcat(send_msg, ":  ");
             strcat(send_msg, msg);
-            send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
+            //send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
+            send_everyone(send_msg, sock, &mutex_GLOBAL, &ids);
         }
         memset(msg, strlen(msg), '\0');
         count_to_2++;
@@ -187,14 +210,14 @@ int main(int argc, char *argv[])
     int port = mx_atoi(argv[1]);
 
     static pthread_mutex_t mutex_GLOBAL;
-    static int clients_GLOBAL[20];
+    //static int clients_GLOBAL[20];
 
-    for (int i = 0; i < 20; i++)
-    {
-        clients_GLOBAL[i] = 0;
-    }
+    // for (int i = 0; i < 20; i++)
+    // {
+    //     clients_GLOBAL[i] = 0;
+    // }
     //static t_list* clients_GLOBAL = NULL;
-    static int n_GLOBAL = 0;
+    //static int n_GLOBAL = 0;
 
     struct sockaddr_in ServerIp;
     pthread_t recvt;
@@ -221,6 +244,9 @@ int main(int argc, char *argv[])
     static sqlite3 *db; // CREATE DATABASE
     create_table(db);
 
+
+    t_list *ids = NULL;
+
     while (1)
     {
         if ((Client_sock = accept(sock, (struct sockaddr *)NULL, NULL)) < 0)
@@ -232,9 +258,10 @@ int main(int argc, char *argv[])
         // mx_printstr("\n");
 
         pthread_mutex_lock(&mutex_GLOBAL);
-        clients_GLOBAL[n_GLOBAL] = Client_sock;
+        //clients_GLOBAL[n_GLOBAL] = Client_sock;
 
-        // mx_push_back(&clients_GLOBAL, &Client_sock);
+        mx_push_back(&ids, mx_strdup(mx_itoa(Client_sock)));
+
         // for (t_list* i = clients_GLOBAL; i != NULL; i = i->next) {
         //     mx_printstr("DATA: ");
         //     mx_printint(*((int*)i->data));
@@ -242,11 +269,12 @@ int main(int argc, char *argv[])
         // }
 
         //mx_static_push_back(&clients_GLOBAL, &Client_sock);
-        n_GLOBAL++;
+        //n_GLOBAL++;
 
-        get_N(&n_GLOBAL, 1);         // to give a value
+        //get_N(&n_GLOBAL, 1);         // to give a value
         get_mutex(&mutex_GLOBAL, 1); // to give a value
-        get_arr(clients_GLOBAL, 1);  // to give a value
+        //get_arr(clients_GLOBAL, 1);  // to give a value
+        get_list(&ids, 1);
         getDataBase(db, 1);          // to give a value
 
         //get_list(&clients_GLOBAL, 1);

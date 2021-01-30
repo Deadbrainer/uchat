@@ -1,6 +1,6 @@
 #include "server.h"
 
-t_list* get_names(sqlite3* db) {
+t_list *get_usernames_from_db(sqlite3 *db) {
     sqlite3_stmt *res;
 
     int rc = sqlite3_open("uchat.db", &db);
