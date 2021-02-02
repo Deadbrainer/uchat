@@ -6,7 +6,41 @@ void main_menu_test()
     gtk_widget_destroy(log_window);
 }
 
-void login_menu()
+void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
+{
+    const char *login_text;
+    const char *password_text;
+    int sock = 0;
+    get_sockid(&sock, 0);
+    fprintf(stderr, "%d\n", sock);
+    login_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
+    password_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
+    char *to_send = mx_strjoin(login_text, " ");
+    to_send = mx_strjoin(to_send, password_text);
+    if (send(sock, to_send, mx_strlen(to_send), 0) < 0)
+    {
+        fprintf(stderr, "sending failure\n");
+    }
+    int len = 0;
+    char* rec = mx_strnew(8);
+    len = recv(sock, rec, 32, 0);
+    printf("GOT: %s\n", rec);
+    if (mx_strcmp(rec, "N") == 0) {
+        printf("NEPRAVULNO\n");
+        login_menu(true);
+    } else if (mx_strcmp(rec, "Y") == 0){
+        printf("PRAVULNO\n");
+    } else {
+        printf("NIHUYA NE PRISHLO\n");
+    }
+    //send(sock, to_send, mx_strlen(to_send), 0);
+    /*if (strcmp(password_text, password) == 0)
+        printf("Access granted!\n");
+    else
+        printf("Access denied!\n");*/
+}
+
+void login_menu(bool wrong_login)
 {
     GtkWidget *username_label, *password_label;
     GtkWidget *username_entry, *password_entry;
@@ -19,6 +53,7 @@ void login_menu()
 
     // application destruction
     g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL); //пояснение сигналов в хедере
+
 
     //text befory entry fields
     username_label = gtk_label_new("Login: ");
@@ -33,7 +68,7 @@ void login_menu()
 
     enter_button = gtk_button_new_with_label("Login");
     //g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(button_clicked), username_entry);
-    g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(main_menu_test), NULL);
+    g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(button_clicked), NULL);
 
     /* Рома: мы не настолько продвинутые (51 line)
     button_check = gtk_check_button_new_with_label("Remember password?"); // TODO: This, without listener BTW */
@@ -52,6 +87,11 @@ void login_menu()
 
     gtk_box_pack_start(GTK_BOX(hbox2), password_label, TRUE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(hbox2), password_entry, TRUE, FALSE, 5);
+    if (wrong_login)
+    {
+        GtkWidget *wrong_pass = gtk_label_new("Wrong login or password");
+        gtk_box_pack_start(GTK_BOX(vbox), wrong_pass, FALSE, FALSE, 1);
+    }
 
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
