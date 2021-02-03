@@ -78,6 +78,7 @@ void get_list(t_list** x, int check) {
 
 void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, t_list** ids)
 {
+    printf("Called me (send everyone)\n");
     pthread_mutex_lock(mutex_GLOBAL); // so that different threads didnt do that at one time (might crash)
 
     // for (int i = 0; i < *n_GLOBAL; i++)
@@ -137,6 +138,8 @@ void *recvmg(void *client_sock)
     int count_to_2 = 0;
     char **get;
 
+    char* sen = mx_strnew(1);
+
     while ((len = recv(sock, msg, 500, 0)) > 0)
     {
         msg[len] = '\0';
@@ -155,14 +158,16 @@ void *recvmg(void *client_sock)
 
             int error = 0;
 
-            bool e;
+            // bool e;
 
             for (t_list* a = users; a != NULL; a = a->next) {
                 if (mx_strcmp(get[0], a->data) == 0) {
 
-                    e = false;
+                    sen[0] = 'Y';
 
-                    if (send(sock, &e, sizeof(e), 0) < 0)
+                    printf("sENDING YES\n");
+
+                    if (send(sock, sen, 2, 0) < 0)
                     {
                         fprintf(stderr, "sending failure\n");
                     }
@@ -173,9 +178,12 @@ void *recvmg(void *client_sock)
             }
             if (!error) {
                 insert_into_db_users(db, get[0], get[1]);
-                e = true;
 
-                if (send(sock, &e, sizeof(e), 0) < 0)
+                sen[0] = 'N';
+
+                printf("sENDING NO\n");
+
+                if (send(sock, sen, 2, 0) < 0)
                 {
                     fprintf(stderr, "sending failure\n");
                 }
@@ -183,15 +191,17 @@ void *recvmg(void *client_sock)
             
             break;
         default:
-            insert_into_db_message(db, name, msg);
+            //insert_into_db_message(db, name, msg);
             //get_from_db_messages(db);
             strcpy(send_msg, name);
             strcat(send_msg, ":  ");
             strcat(send_msg, msg);
             //send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
             send_everyone(send_msg, sock, &mutex_GLOBAL, &ids);
+
+            memset(msg, strlen(msg), '\0'); //! NEW
         }
-        memset(msg, strlen(msg), '\0');
+        //memset(msg, strlen(msg), '\0');
         count_to_2++;
     }
 
@@ -230,6 +240,7 @@ int main(int argc, char *argv[])
     if (bind(sock, (struct sockaddr *)&ServerIp, sizeof(ServerIp)) == -1)
     {
         fprintf(stderr, "binding failure\n");
+        return 0;
     }
     else
     {
@@ -246,6 +257,12 @@ int main(int argc, char *argv[])
 
 
     t_list *ids = NULL;
+
+
+    pid_t pid;
+    pid = getpid();
+    printf("Process ID is: %d\n", pid); //! PID Printing
+
 
     while (1)
     {

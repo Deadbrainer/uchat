@@ -33,6 +33,7 @@ void get_sockid(int *sockid, int check)
 
 void *recvmg(void *my_sock)
 {
+    printf("Waintig for messages to write\n");
     char *msg;
     get_array(&msg, 0);
 
@@ -91,6 +92,7 @@ int main(int argc, char *argv[])
     if (connect(sock, (struct sockaddr *)&ServerIp, sizeof(ServerIp)) == -1)
     {
         fprintf(stderr, "Connection failure\n");
+        return 0;
     }
     else
     {
@@ -98,13 +100,13 @@ int main(int argc, char *argv[])
     }
 
     get_array(&msg, 1); // assign value
+    get_sockid(&sock, 1);
+
+    login_menu(false);
+    gtk_main();
 
     pthread_create(&recvt, NULL, (void *)recvmg, &sock); // client thread which is always waiting for a message
-
-    get_sockid(&sock, 1);
     // gtk windows
-    login_menu();
-    gtk_main();
 
     //read a message from stdin (console)
     while (fgets(msg, 500, stdin) > 0)

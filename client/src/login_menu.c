@@ -1,5 +1,11 @@
 #include "../inc/uchat.h"
 
+void main_menu_test()
+{
+    main_menu();
+    gtk_widget_destroy(log_window);
+}
+
 void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
 {
     const char *login_text;
@@ -16,6 +22,22 @@ void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
     {
         fprintf(stderr, "sending failure\n");
     }
+
+    int len = 0;
+    char* rec = mx_strnew(8);
+    len = recv(sock, rec, 32, 0);
+
+    printf("GOT: %s\n", rec);
+    if (mx_strcmp(rec, "N") == 0) {
+        //printf("NEPRAVULNO\n");
+        main_menu_test();
+    } else if (mx_strcmp(rec, "Y") == 0){
+        //printf("PRAVULNO\n");
+        login_menu(true);
+    } else {
+        printf("NIHUYA NE PRISHLO\n");
+    }
+
     //send(sock, to_send, mx_strlen(to_send), 0);
     /*if (strcmp(password_text, password) == 0)
         printf("Access granted!\n");
@@ -23,7 +45,7 @@ void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
         printf("Access denied!\n");*/
 }
 
-void login_menu()
+void login_menu(bool wrong_login)
 {
     GtkWidget *username_label, *password_label;
     GtkWidget *username_entry, *password_entry;
@@ -32,8 +54,11 @@ void login_menu()
     GtkWidget *reg_button;
 
     // Window creation
-    log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    new_window(log_window, -1, -1, FALSE, 2, "Uchat Log In");
+    if(!wrong_login)
+    {
+        log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+        new_window(log_window, -1, -1, FALSE, 2, "Uchat Log In");
+    }
 
     // application destruction
     g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL); //пояснение сигналов хедере
@@ -72,6 +97,11 @@ void login_menu()
 
     gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
+    if (wrong_login)
+    {
+        GtkWidget *wrong_pass = gtk_label_new("Wrong login or password");
+        gtk_box_pack_start(GTK_BOX(vbox), wrong_pass, FALSE, FALSE, 1);
+    }
     //gtk_box_pack_start(GTK_BOX(vbox), button_check, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), enter_button, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), reg_button, FALSE, FALSE, 5);
