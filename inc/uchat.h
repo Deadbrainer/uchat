@@ -38,7 +38,7 @@ void new_window(GtkWidget *win, int x, int z, bool resize, int border, char titl
 void window_switch(GtkWidget *window, gpointer data);
 
 //Opens login menu
-void login_menu(bool wrong_login);
+void login_menu();
 
 //Макс блять сделай с этим, что-то. Оно ща в uchat.c (Я на 90% уверен, что он нихуя не сделает)
 void button_clicked(GtkWidget *button, gpointer data);
