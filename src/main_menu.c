@@ -18,18 +18,16 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*
     if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
     {
         GtkTextIter iter;
-        GtkTextIter end;
         GtkTextMark *cursor;
         GtkWidget *textEntry;
         get_text_entry(&textEntry, 0);
 
         const gchar *text = gtk_entry_get_text(GTK_ENTRY(textEntry));
 
-        int sock = 0;
-        get_sockid(&sock, 0);
-        fprintf(stderr, "%d\n", sock);
-
-        send();
+        //int sock = 0;
+        //get_sockid(&sock, 0);
+        //fprintf(stderr, "%d\n", sock);
+        //send();
 
         cursor = gtk_text_buffer_get_mark(buffer, "insert");
         gtk_text_buffer_get_iter_at_mark(buffer, &iter, cursor);
@@ -55,7 +53,7 @@ void main_menu()
 
     //textview parametres
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textArea), false);
-    //gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), false);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), false);
 
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");

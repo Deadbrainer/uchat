@@ -9,6 +9,11 @@ GtkWidget *log_window;
 GtkWidget *reg_window;
 GtkWidget *main_window;
 
+struct all_text_buffers
+{
+      GtkTextBuffer *buffer;
+};
+
 /*
 g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
@@ -31,9 +36,8 @@ https://developer.gnome.org/gtk3/stable/GtkWidget.html -- Крутим к огл
 **/
 void new_window(GtkWidget *win, int x, int z, bool resize, int border, char title[]);
 
-/** Closes window and opens new. Data rule: put from which window it's calling
- * @param window window to close
- * @param data what function to execute
+/** Closes window and opens new. Data rule: put which window it's calling
+ * @param data wich window to open
 */
 void window_switch(GtkWidget *window, gpointer data);
 
