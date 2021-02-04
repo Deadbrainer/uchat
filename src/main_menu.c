@@ -1,7 +1,5 @@
 #include "../inc/uchat.h"
 
-GtkWidget *textArea;
-
 void get_text_entry(GtkWidget **textEntry, bool check)
 {
     static GtkWidget *t;
@@ -18,7 +16,7 @@ void get_text_entry(GtkWidget **textEntry, bool check)
 int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*gpointer user_data*/)
 {
     if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
-    { 
+    {
         GtkTextIter iter;
         GtkTextIter end;
         GtkTextMark *cursor;
@@ -27,12 +25,18 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*
 
         const gchar *text = gtk_entry_get_text(GTK_ENTRY(textEntry));
 
-        cursor = gtk_text_buffer_get_mark (buffer, "insert");
-        gtk_text_buffer_get_iter_at_mark (buffer, &iter, cursor);
+        int sock = 0;
+        get_sockid(&sock, 0);
+        fprintf(stderr, "%d\n", sock);
+
+        send();
+
+        cursor = gtk_text_buffer_get_mark(buffer, "insert");
+        gtk_text_buffer_get_iter_at_mark(buffer, &iter, cursor);
         gtk_text_iter_forward_to_end(&iter);
-        gtk_text_buffer_place_cursor (buffer, &iter);
-        gtk_text_buffer_insert (buffer, &iter, text, -1);
-        gtk_text_buffer_insert (buffer, &iter, "\n\n", -1);
+        gtk_text_buffer_place_cursor(buffer, &iter);
+        gtk_text_buffer_insert(buffer, &iter, text, -1);
+        gtk_text_buffer_insert(buffer, &iter, "\n\n", -1);
         gtk_entry_set_text(GTK_ENTRY(textEntry), "");
     }
     return false;
@@ -40,10 +44,10 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*
 
 void main_menu()
 {
+    GtkWidget *textArea = gtk_text_view_new();
     GtkWidget *scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
     GtkWidget *textEntry = gtk_entry_new();
     get_text_entry(&textEntry, 1);
-    textArea = gtk_text_view_new();
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
     GtkTextBuffer *buffer;

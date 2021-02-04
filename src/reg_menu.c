@@ -1,5 +1,10 @@
 #include "../inc/uchat.h"
 
+//?void reg_clicked(GtkWidget *window, gpointer data)
+//?{
+//?    
+//?}
+
 void reg_menu(GtkWidget *button, gpointer data)
 {
     GtkWidget *username_label, *password_label;
@@ -25,6 +30,8 @@ void reg_menu(GtkWidget *button, gpointer data)
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE); //* makes password hidden
 
     reg_button = gtk_button_new_with_label("Register new account");
+    //?g_signal_connect(G_OBJECT(reg_button), "clicked", G_CALLBACK(reg_clicked), username_entry);
+    //?g_signal_connect_after(G_OBJECT(reg_button), "clicked", G_CALLBACK(reg_clicked), password_entry);
 
 //Packing buttons and fields
     hbox1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
