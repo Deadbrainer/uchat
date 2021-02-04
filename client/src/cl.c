@@ -1,5 +1,5 @@
 
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 // char msg[500];
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     get_array(&msg, 1); // assign value
     get_sockid(&sock, 1);
 
-    login_menu(false);
+    login_menu(true);
     gtk_main();
 
     pthread_create(&recvt, NULL, (void *)recvmg, &sock); // client thread which is always waiting for a message
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    //thread is closed
+        //thread is closed
     pthread_join(recvt, NULL);
     close(sock);
     return 0;

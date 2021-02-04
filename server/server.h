@@ -17,3 +17,4 @@ void insert_into_db_users(sqlite3 *db, char *name, char *password);
 t_list *get_usernames_from_db(sqlite3 *db);
 void insert_into_db_message(sqlite3 *db, char *name, char *msg);
 void get_from_db_messages(sqlite3 *db);
+char *get_password_from_db(sqlite3 *db, char *name);

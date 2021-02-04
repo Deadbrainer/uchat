@@ -1,4 +1,4 @@
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 void new_window(GtkWidget *win, int x, int z, bool resize, int border, char title[]) {
     gtk_window_set_title(GTK_WINDOW(win), title);

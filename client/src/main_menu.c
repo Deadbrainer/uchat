@@ -1,4 +1,4 @@
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 void on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {

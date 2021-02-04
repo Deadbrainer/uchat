@@ -46,7 +46,7 @@ void window_switch(GtkWidget *window, gpointer data);
 void login_menu(bool wrong_login);
 
 //Макс блять сделай с этим, что-то. Оно ща в uchat.c (Я на 90% уверен, что он нихуя не сделает)
-void button_clicked(GtkWidget *button, gpointer data);
+void login_clicked_username(GtkWidget *button, gpointer data);
 
 //Opens new window for registering
 void reg_menu();
