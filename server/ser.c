@@ -108,7 +108,8 @@ void *recvmg(void *client_sock)
     int sock = *((int *)client_sock); // so that is happening))
     char msg[500];
     int len;
-    char *send_msg = malloc(500);
+    char *send_msg;
+    //char send_msg[500];
     char *name = NULL;
 
     // static int n_GLOBAL;
@@ -193,15 +194,24 @@ void *recvmg(void *client_sock)
         default:
             //insert_into_db_message(db, name, msg);
             //get_from_db_messages(db);
-            strcpy(send_msg, name);
-            strcat(send_msg, ":  ");
-            strcat(send_msg, msg);
+
+            printf("On the server: %s\n", msg);
+
+            send_msg = mx_strjoin(name, ":  ");
+            send_msg = mx_strjoin(send_msg, msg);
+
+            printf("On the server send_msg: %s\n", send_msg);
+
+            // strcpy(send_msg, name);
+            // strcat(send_msg, ":  ");
+            // strcat(send_msg, msg);
             //send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
             send_everyone(send_msg, sock, &mutex_GLOBAL, &ids);
 
-            memset(msg, strlen(msg), '\0'); //! NEW
+            //memset(msg, strlen(msg), '\0'); //! NEW
         }
-        //memset(msg, strlen(msg), '\0');
+        memset(msg, strlen(msg), '\0');
+        memset(send_msg, strlen(send_msg), '\0');
         count_to_2++;
     }
 
