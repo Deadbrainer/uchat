@@ -31,34 +31,34 @@ void get_sockid(int *sockid, int check)
     }
 }
 
-void *recvmg(void *my_sock)
-{
-    printf("Waintig for messages to write\n");
-    char *msg;
-    get_array(&msg, 0);
+// void *recvmg(void *my_sock)
+// {
+//     printf("Waintig for messages to write\n");
+//     char *msg;
+//     get_array(&msg, 0);
 
-    int sock = *((int *)my_sock);
-    int len;
-    while ((len = recv(sock, msg, 500, 0)) > 0)
-    {
-        msg[len] = '\0';
-        fputs(msg, stdout);
-    }
-    return NULL; // to silence warning
-} // should not return anything
+//     int sock = *((int *)my_sock);
+//     int len;
+//     while ((len = recv(sock, msg, 500, 0)) > 0)
+//     {
+//         msg[len] = '\0';
+//         fputs(msg, stdout);
+//     }
+//     return NULL; // to silence warning
+// } // should not return anything
 
-void str_trim_lf(char *arr, int length)
-{
-    int i;
-    for (i = 0; i < length; i++)
-    { // trim \n
-        if (arr[i] == '\n')
-        {
-            arr[i] = '\0';
-            break;
-        }
-    }
-}
+// void str_trim_lf(char *arr, int length)
+// {
+//     int i;
+//     for (i = 0; i < length; i++)
+//     { // trim \n
+//         if (arr[i] == '\n')
+//         {
+//             arr[i] = '\0';
+//             break;
+//         }
+//     }
+// }
 
 int main(int argc, char *argv[])
 {
@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
     //char msg[500];
     char *msg = malloc(500);
 
-    pthread_t recvt;
-    int len;
+    // pthread_t recvt;
+    // int len;
     int sock;
 
     //char *send_msg = malloc(500);
@@ -105,24 +105,24 @@ int main(int argc, char *argv[])
     login_menu(true);
     gtk_main();
 
-    pthread_create(&recvt, NULL, (void *)recvmg, &sock); // client thread which is always waiting for a message
-    // gtk windows
+    // pthread_create(&recvt, NULL, (void *)recvmg, &sock); // client thread which is always waiting for a message
+    // // gtk windows
 
-    //read a message from stdin (console)
-    while (fgets(msg, 500, stdin) > 0)
-    {
-        // strcpy(send_msg, client_name);
-        // strcat(send_msg, ":  ");
-        // strcat(send_msg, msg);
-        len = write(sock, msg, strlen(msg));
-        if (len < 0)
-        {
-            printf("\n message not send");
-        }
-    }
+    // //read a message from stdin (console)
+    // while (fgets(msg, 500, stdin) > 0)
+    // {
+    //     // strcpy(send_msg, client_name);
+    //     // strcat(send_msg, ":  ");
+    //     // strcat(send_msg, msg);
+    //     len = write(sock, msg, strlen(msg));
+    //     if (len < 0)
+    //     {
+    //         printf("\n message not send");
+    //     }
+    // }
 
-        //thread is closed
-    pthread_join(recvt, NULL);
+    //     //thread is closed
+    // pthread_join(recvt, NULL);
     close(sock);
     return 0;
 }
