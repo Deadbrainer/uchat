@@ -133,47 +133,70 @@ void *recvmg(void *client_sock)
 
     int count_to_2 = 0;
     t_list *users = NULL;
-    char *sen = mx_strnew(1);
+
+
+    char send_back[3];
+    send_back[2] = '\0';
 
     while ((len = recv(sock, msg, 500, 0)) > 0)
     {
+
+
+        printf("Got message: %s\n", msg);
+
+
         msg[len] = '\0';
 
         switch (count_to_2)
         {
         case 0:
 
-            if (mx_strcmp(msg, "L\0") == 0)
-            {
+            // printf("checking if reg or log\n");
+
+            // if (mx_strcmp(msg, "L\0") == 0)
+            // {
+            //     check_signin = 1;
+            //     memset(msg, 1, '\0');
+            // }
+
+            printf("checking string\n");
+
+            char** cut_str = mx_strsplit(msg, ' ');
+
+            //! CHECKING IF LOG OR REG
+
+            if (mx_strcmp(cut_str[0], "L") == 0) {
                 check_signin = 1;
-                memset(msg, 1, '\0');
+                bzero(msg, 1);
             }
 
-            break;
-        case 1:
-            //get_from_db_users(db);
+            char send_back[3];
+            send_back[2] = '\0';
+
+            //! PROCESSING LOGIN
+
             users = get_usernames_from_db(db);
             int error = 0;
             for (t_list *a = users; a != NULL; a = a->next)
             {
-                if (mx_strcmp(msg, a->data) == 0)
+                if (mx_strcmp(cut_str[1], a->data) == 0)
                 {
 
-                    sen[0] = 'Y';
+                    send_back[0] = 'Y';
 
-                    printf("sENDING YES\n");
+                    printf("Found such name\n");
 
-                    if (send(sock, sen, 2, 0) < 0)
-                    {
-                        fprintf(stderr, "sending failure\n");
-                    }
+                    // if (send(sock, sen, 2, 0) < 0)
+                    // {
+                    //     fprintf(stderr, "sending failure\n");
+                    // }
                     if (check_signin == 0)
                     {
                         count_to_2 = 0;
                     }
                     else
                     {
-                        name = mx_strdup(msg);
+                        name = mx_strdup(cut_str[1]);
                     }
                     error = 1;
                     break;
@@ -182,58 +205,158 @@ void *recvmg(void *client_sock)
             if (!error)
             {
 
-                sen[0] = 'N';
+                printf("Didnt found ound such name\n");
 
-                printf("sENDING NO\n");
+                send_back[0] = 'N';
+
+                //printf("sENDING NO\n");
                 if (check_signin == 1)
                 {
-                    count_to_2 = 0;
+                    count_to_2 = -1;
                 }
-                if (send(sock, sen, 2, 0) < 0)
-                {
-                    fprintf(stderr, "sending failure\n");
-                }
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
             }
-            break;
-        case 2:
+
+            //!PROCESSING PASSWORD
+
             password = get_password_from_db(db, name);
-            if (mx_strcmp(msg, password) == 0)
+
+            if (strcmp(cut_str[2], password) == 0)
             {
-                sen[0] = 'Y';
+                printf("Password matches\n");
 
-                printf("sENDING YES\n");
+                send_back[1] = 'Y';
 
-                if (send(sock, sen, 2, 0) < 0)
-                {
-                    fprintf(stderr, "sending failure\n");
-                }
-                get_password(&msg, 1);
-                error = 1;
-                break;
+                //printf("sENDING YES\n");
+
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
+                // get_password(&msg, 1);
             }
             else
             {
+                printf("Password doesnt match\n");
 
-                sen[0] = 'N';
+                printf("Entered password is: %s\n", cut_str[2]);
+                printf("Real password is: %s\n", password);
 
-                printf("sENDING NO\n");
+                send_back[1] = 'N';
 
-                if (send(sock, sen, 2, 0) < 0)
-                {
-                    fprintf(stderr, "sending failure\n");
-                }
-                count_to_2 = 0;
+                // printf("sENDING NO\n");
+
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
+                count_to_2 = -1;
+            }
+
+            //! SENDING ANSWER
+
+            printf("sENDING answer: %s\n", send_back);
+
+            if (send(sock, send_back, 3, 0) < 0)
+            {
+                fprintf(stderr, "sending failure\n");
             }
             break;
+        // case 1:
+
+        //     printf("checking username\n");
+
+        //     //get_from_db_users(db);
+        //     users = get_usernames_from_db(db);
+        //     int error = 0;
+        //     for (t_list *a = users; a != NULL; a = a->next)
+        //     {
+        //         if (mx_strcmp(msg, a->data) == 0)
+        //         {
+
+        //             sen[0] = 'Y';
+
+        //             printf("sENDING YES\n");
+
+        //             if (send(sock, sen, 2, 0) < 0)
+        //             {
+        //                 fprintf(stderr, "sending failure\n");
+        //             }
+        //             if (check_signin == 0)
+        //             {
+        //                 count_to_2 = 0;
+        //             }
+        //             else
+        //             {
+        //                 name = mx_strdup(msg);
+        //             }
+        //             error = 1;
+        //             break;
+        //         }
+        //     }
+        //     if (!error)
+        //     {
+
+        //         sen[0] = 'N';
+
+        //         printf("sENDING NO\n");
+        //         if (check_signin == 1)
+        //         {
+        //             count_to_2 = 0;
+        //         }
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //     }
+        //     break;
+        // case 2:
+
+        //     printf("checking password\n");
+
+        //     password = get_password_from_db(db, name);
+        //     if (mx_strcmp(msg, password) == 0)
+        //     {
+        //         sen[0] = 'Y';
+
+        //         printf("sENDING YES\n");
+
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //         get_password(&msg, 1);
+        //         error = 1;
+        //         break;
+        //     }
+        //     else
+        //     {
+
+        //         sen[0] = 'N';
+
+        //         printf("sENDING NO\n");
+
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //         count_to_2 = 0;
+        //     }
+        //     break;
         default:
-            if (count_to_2 == 3)
+
+            printf("receiving message\n");
+
+
+            if (check_signin == 0)
             {
-                if (check_signin == 0)
-                {
-                    get_password(&password, 0);
-                    insert_into_db_users(db, name, password);
-                }
+                get_password(&password, 0);
+                insert_into_db_users(db, name, password);
             }
+
             //insert_into_db_message(db, name, msg);
             //get_from_db_messages(db);
             strcpy(send_msg, name);
@@ -246,6 +369,9 @@ void *recvmg(void *client_sock)
         }
         //memset(msg, strlen(msg), '\0');
         count_to_2++;
+
+        printf("Now count is: %i\n", count_to_2);
+
     }
 
     return NULL; // to silence warning
@@ -297,7 +423,7 @@ int main(int argc, char *argv[])
 
     static sqlite3 *db; // CREATE DATABASE
     create_table(db);
-    //get_from_db_users(db);
+    get_from_db_users(db);
 
     t_list *ids = NULL;
 

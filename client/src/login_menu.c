@@ -2,8 +2,8 @@
 
 void main_menu_test()
 {
-    main_menu();
     gtk_widget_destroy(log_window);
+    main_menu();
 }
 
 void get_if_login_ok(bool *flag, int check)
@@ -20,74 +20,114 @@ void get_if_login_ok(bool *flag, int check)
     }
 }
 
+void get_login(char **login, int check)
+{
+    static char* n;
+
+    if (check)
+    {
+        n = *login;
+    }
+    else
+    {
+        *login = n;
+    }
+}
+
 void login_clicked_username(GtkWidget *button, gpointer data)
 {
     int sock = 0;
     get_sockid(&sock, 0);
-    static bool login_ok = 0;
-    const char *username = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
-    send(sock, "L\0", 2, 0);
-    if (send(sock, username, mx_strlen(username), 0) < 0)
-    {
-        fprintf(stderr, "sending failure\n");
-    }
+    //static bool login_ok = 0;
+    char *username = (char *)gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
 
-    int len = 0;
-    char *rec = mx_strnew(8);
-    len = recv(sock, rec, 32, 0);
+    get_login(&username, 1); //!assign
 
-    printf("GOT: %s\n", rec);
-    if (mx_strcmp(rec, "Y") == 0)
-    {
-        login_ok = 1;
-        get_if_login_ok(&login_ok, 1);
-    }
-    else if (mx_strcmp(rec, "N") == 0)
-    {
-        login_menu(false);
-    }
-    else
-    {
-        printf("NIHUYA NE PRISHLO\n");
-    }
+    // if (send(sock, "L\0", 2, 0) < 0) {
+    //     fprintf(stderr, "sending failure\n");
+    // } else {
+    //     printf("sent L\n");
+    // }
+
+    // if (send(sock, username, mx_strlen(username), 0) < 0)
+    // {
+    //     fprintf(stderr, "sending failure\n");
+    // } else {
+    //     printf("sent login %s\n", username);
+    // }
+
+    // int len = 0;
+    // char *rec = mx_strnew(8);
+    // if ((len = recv(sock, rec, 32, 0))) {
+    //     printf("Got answer(login) %s\n", rec);
+    // }
+
+    // // printf("GOT: %s\n", rec);
+    // if (mx_strcmp(rec, "Y") == 0)
+    // {
+    //     login_ok = 1;
+    //     get_if_login_ok(&login_ok, 1);
+    // }
+    // else if (mx_strcmp(rec, "N") == 0)
+    // {
+    //     login_menu(false);
+    // }
+    // else
+    // {
+    //     printf("NIHUYA NE PRISHLO\n");
+    // }
 }
 
 void login_clicked_password(GtkWidget *button, gpointer data)
 {
     int sock = 0;
     get_sockid(&sock, 0);
-    static bool password_ok = 0;
-    bool login_ok = 0;
-    const char *password = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
+    //static bool password_ok = 0;
+    //bool login_ok = 0;
+    char *password = (char *)gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
 
-    if (send(sock, password, mx_strlen(password), 0) < 0)
+    char* username;
+    get_login(&username, 0);
+
+
+    username = mx_strjoin("L ", username);
+    username = mx_strjoin(username, " ");
+    username = mx_strjoin(username, password);
+
+    if (send(sock, username, mx_strlen(username), 0) < 0)
     {
         fprintf(stderr, "sending failure\n");
+    } else {
+        printf("sent string: %s\n", username);
     }
 
     int len = 0;
     char *rec = mx_strnew(8);
-    len = recv(sock, rec, 32, 0);
 
-    printf("GOT: %s\n", rec);
-    if (mx_strcmp(rec, "Y") == 0)
-    {
-        password_ok = 1;
+    if ((len = recv(sock, rec, 3, 0))) {
+        printf("Got answer: %s\n", rec);
     }
-    else if (mx_strcmp(rec, "N") == 0)
+
+    // printf("GOT: %s\n", rec);
+    if (mx_strcmp(rec, "YY") == 0)
+    {
+        main_menu_test();
+        //password_ok = 1;
+    }
+    else if ((mx_strcmp(rec, "YN") == 0) || (mx_strcmp(rec, "NY") == 0))
     {
         login_menu(false);
     }
     else
     {
-        printf("NIHUYA NE PRISHLO\n");
+        printf("Unexpected answer: %s\n", rec);
     }
 
-    get_if_login_ok(&login_ok, 0);
-    if (login_ok == 1 && password_ok == 1)
-    {
-        main_menu_test();
-    }
+    // get_if_login_ok(&login_ok, 0);
+    // if (login_ok == 1 && password_ok == 1)
+    // {
+    //     main_menu_test();
+    // }
 }
 
 void login_menu(bool wrong_login)
