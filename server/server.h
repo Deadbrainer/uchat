@@ -18,3 +18,9 @@ t_list *get_usernames_from_db(sqlite3 *db);
 void insert_into_db_message(sqlite3 *db, char *name, char *msg);
 void get_from_db_messages(sqlite3 *db);
 char *get_password_from_db(sqlite3 *db, char *name);
+
+//Getters
+void getDataBase(sqlite3 *x, int check);
+void get_password(char **password, int check);
+void get_mutex(pthread_mutex_t *x, int check);
+void get_list(t_list **x, int check);
