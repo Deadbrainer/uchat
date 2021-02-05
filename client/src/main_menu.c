@@ -39,27 +39,10 @@ void get_iter(GtkTextIter *iter, bool check)
     }
 }
 
-// void get_array(char **array, int check)
-// { // to an array from main
-//     static char *n;
-
-//     if (check)
-//     {
-//         n = *array;
-//     }
-//     else
-//     {
-//         *array = n;
-//     }
-// }
-
 void *recvmg_new(void *my_sock)
 {
     printf("Waintig for messages to write\n");
     char *msg = mx_strnew(500);
-
-    //char* msg = mx_strnew(500);
-    //get_array(&msg, 0);
 
     int sock = *((int *)my_sock);
     int len;
@@ -87,7 +70,6 @@ void *recvmg_new(void *my_sock)
     }
 
     free(&msg);
-    //memset(msg, 500, '\0');
 
     return NULL; // to silence warning
 }

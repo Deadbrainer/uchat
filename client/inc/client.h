@@ -10,10 +10,10 @@
 #include <pthread.h>
 #include "../../libmx/inc/libmx.h"
 
-GtkWidget *log_window;
-GtkWidget *reg_window;
+GtkWidget *welcome_window;
 GtkWidget *main_window;
-
+GtkWidget *log_error_label;
+GtkWidget *reg_error_label;
 /*
 g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
@@ -57,3 +57,21 @@ void closeApp(GtkWidget *window, gpointer data);
 void get_sockid(int *sockid, int check);
 
 void main_menu();
+
+//Getters
+void get_error_label(GtkWidget **log_error_label, bool check);
+void get_if_login_ok(bool *flag, int check);
+void get_login(char **login, int check);
+void get_array(char **array, int check);
+void get_password(char **password, int check);
+
+//Registration Handler
+void reg_clicked_username(GtkWidget *button, gpointer data);
+void reg_clicked_password(GtkWidget *button, gpointer data);
+void reg_clicked_password_repeat(GtkWidget *button, gpointer data);
+
+//Signin Handler
+void login_clicked_username(GtkWidget *button, gpointer data);
+void login_clicked_password(GtkWidget *button, gpointer data);
+
+void main_menu_test();
