@@ -1,5 +1,5 @@
 
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 void closeApp(GtkWidget *window, gpointer data)
 {

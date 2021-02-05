@@ -18,17 +18,31 @@ void getDataBase(sqlite3 *x, int check)
     }
 }
 
-void get_N(int *x, int check)
+// void get_username(char **name, int check)
+// { // to get variables from main
+//     static char *n;
+
+//     if (check)
+//     {
+//         n = mx_strdup(*name);
+//     }
+//     else
+//     {
+//         *name = mx_strdup(n);
+//     }
+// }
+
+void get_password(char **password, int check)
 { // to get variables from main
-    static int n;
+    static char *n;
 
     if (check)
     {
-        n = *x;
+        n = mx_strdup(*password);
     }
     else
     {
-        *x = n;
+        *password = mx_strdup(n);
     }
 }
 
@@ -66,35 +80,31 @@ void get_arr(int d[], int check)
     }
 }
 
-void get_list(t_list** x, int check) {
-    static t_list* n;
+void get_list(t_list **x, int check)
+{
+    static t_list *n;
 
-    if(check) {
+    if (check)
+    {
         n = *x;
-    } else {
+    }
+    else
+    {
         *x = n;
     }
 }
 
-void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, t_list** ids)
+void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, t_list **ids)
 {
     printf("Called me (send everyone)\n");
     pthread_mutex_lock(mutex_GLOBAL); // so that different threads didnt do that at one time (might crash)
 
-    // for (int i = 0; i < *n_GLOBAL; i++)
-    // {
-    //     if (clients_GLOBAL[i] != sock)
-    //     {
-    //         if (send(clients_GLOBAL[i], msg, strlen(msg), 0) < 0)
-    //         {
-    //             fprintf(stderr, "sending failure\n");
-    //         }
-    //     }
-    // }
-
-    for (t_list* a = *ids; a != NULL; a = a->next) {
-        if (mx_atoi((char*)(a->data)) != sock) {
-            if (send(mx_atoi((char*)(a->data)), msg, strlen(msg), 0) < 0) {
+    for (t_list *a = *ids; a != NULL; a = a->next)
+    {
+        if (mx_atoi((char *)(a->data)) != sock)
+        {
+            if (send(mx_atoi((char *)(a->data)), msg, strlen(msg), 0) < 0)
+            {
                 fprintf(stderr, "sending failure\n");
             }
         }
@@ -104,115 +114,264 @@ void send_everyone(char *msg, int sock, pthread_mutex_t *mutex_GLOBAL, t_list** 
 }
 
 void *recvmg(void *client_sock)
-{                                     // that func can only accept void* argument
-    int sock = *((int *)client_sock); // so that is happening))
-    char msg[500];
+{ // that func can only accept void* argument
+    int sock = *((int *)client_sock);
+    char *msg = mx_strnew(500);
     int len;
-    char *send_msg;
-    //char send_msg[500];
+    char *send_msg = malloc(500);
     char *name = NULL;
-
-    // static int n_GLOBAL;
-    // get_N(&n_GLOBAL, 0);
+    char *password = NULL;
 
     static pthread_mutex_t mutex_GLOBAL;
     get_mutex(&mutex_GLOBAL, 0);
 
-    // static int clients_GLOBAL[20];
-
-    // get_arr(clients_GLOBAL, 0);
-
-    t_list* ids = NULL;
+    t_list *ids = NULL;
     get_list(&ids, 0);
-
-    // printf("Crash here?\n");
-
-    // for (t_list* a = ids; a != NULL; a = a->next) {
-    //     printf("%s\n", a->data);
-    // }
-
-    // printf("Nope\n");
-
     static sqlite3 *db;
     getDataBase(db, 0);
+    int check_signin = 0;
 
     int count_to_2 = 0;
-    char **get;
+    t_list *users = NULL;
 
-    char* sen = mx_strnew(1);
+
+    char send_back[3];
+    send_back[2] = '\0';
 
     while ((len = recv(sock, msg, 500, 0)) > 0)
     {
+
+
+        printf("Got message: %s\n", msg);
+
+
         msg[len] = '\0';
 
-        if (count_to_2 == 0)
-        {
-            get = mx_strsplit(msg, ' ');
-        }
         switch (count_to_2)
         {
         case 0:
-            name = get[0];
-            //get_from_db_users(db);
 
-            t_list *users = get_usernames_from_db(db);
+            // printf("checking if reg or log\n");
 
+            // if (mx_strcmp(msg, "L\0") == 0)
+            // {
+            //     check_signin = 1;
+            //     memset(msg, 1, '\0');
+            // }
+
+            printf("checking string\n");
+
+            char** cut_str = mx_strsplit(msg, ' ');
+
+            //! CHECKING IF LOG OR REG
+
+            if (mx_strcmp(cut_str[0], "L") == 0) {
+                check_signin = 1;
+                bzero(msg, 1);
+            }
+
+            char send_back[3];
+            send_back[2] = '\0';
+
+            //! PROCESSING LOGIN
+
+            users = get_usernames_from_db(db);
             int error = 0;
+            for (t_list *a = users; a != NULL; a = a->next)
+            {
+                if (mx_strcmp(cut_str[1], a->data) == 0)
+                {
 
-            // bool e;
+                    send_back[0] = 'Y';
 
-            for (t_list* a = users; a != NULL; a = a->next) {
-                if (mx_strcmp(get[0], a->data) == 0) {
+                    printf("Found such name\n");
 
-                    sen[0] = 'Y';
-
-                    printf("sENDING YES\n");
-
-                    if (send(sock, sen, 2, 0) < 0)
+                    // if (send(sock, sen, 2, 0) < 0)
+                    // {
+                    //     fprintf(stderr, "sending failure\n");
+                    // }
+                    if (check_signin == 0)
                     {
-                        fprintf(stderr, "sending failure\n");
+                        count_to_2 = 0;
                     }
-                    count_to_2--;
+                    else
+                    {
+                        name = mx_strdup(cut_str[1]);
+                    }
                     error = 1;
                     break;
                 }
             }
-            if (!error) {
-                insert_into_db_users(db, get[0], get[1]);
+            if (!error)
+            {
 
-                sen[0] = 'N';
+                printf("Didnt found ound such name\n");
 
-                printf("sENDING NO\n");
+                send_back[0] = 'N';
 
-                if (send(sock, sen, 2, 0) < 0)
+                //printf("sENDING NO\n");
+                if (check_signin == 1)
                 {
-                    fprintf(stderr, "sending failure\n");
+                    count_to_2 = -1;
                 }
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
             }
-            
+
+            //!PROCESSING PASSWORD
+
+            password = get_password_from_db(db, name);
+
+            if (strcmp(cut_str[2], password) == 0)
+            {
+                printf("Password matches\n");
+
+                send_back[1] = 'Y';
+
+                //printf("sENDING YES\n");
+
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
+                // get_password(&msg, 1);
+            }
+            else
+            {
+                printf("Password doesnt match\n");
+
+                printf("Entered password is: %s\n", cut_str[2]);
+                printf("Real password is: %s\n", password);
+
+                send_back[1] = 'N';
+
+                // printf("sENDING NO\n");
+
+                // if (send(sock, sen, 2, 0) < 0)
+                // {
+                //     fprintf(stderr, "sending failure\n");
+                // }
+                count_to_2 = -1;
+            }
+
+            //! SENDING ANSWER
+
+            printf("sENDING answer: %s\n", send_back);
+
+            if (send(sock, send_back, 3, 0) < 0)
+            {
+                fprintf(stderr, "sending failure\n");
+            }
             break;
+        // case 1:
+
+        //     printf("checking username\n");
+
+        //     //get_from_db_users(db);
+        //     users = get_usernames_from_db(db);
+        //     int error = 0;
+        //     for (t_list *a = users; a != NULL; a = a->next)
+        //     {
+        //         if (mx_strcmp(msg, a->data) == 0)
+        //         {
+
+        //             sen[0] = 'Y';
+
+        //             printf("sENDING YES\n");
+
+        //             if (send(sock, sen, 2, 0) < 0)
+        //             {
+        //                 fprintf(stderr, "sending failure\n");
+        //             }
+        //             if (check_signin == 0)
+        //             {
+        //                 count_to_2 = 0;
+        //             }
+        //             else
+        //             {
+        //                 name = mx_strdup(msg);
+        //             }
+        //             error = 1;
+        //             break;
+        //         }
+        //     }
+        //     if (!error)
+        //     {
+
+        //         sen[0] = 'N';
+
+        //         printf("sENDING NO\n");
+        //         if (check_signin == 1)
+        //         {
+        //             count_to_2 = 0;
+        //         }
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //     }
+        //     break;
+        // case 2:
+
+        //     printf("checking password\n");
+
+        //     password = get_password_from_db(db, name);
+        //     if (mx_strcmp(msg, password) == 0)
+        //     {
+        //         sen[0] = 'Y';
+
+        //         printf("sENDING YES\n");
+
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //         get_password(&msg, 1);
+        //         error = 1;
+        //         break;
+        //     }
+        //     else
+        //     {
+
+        //         sen[0] = 'N';
+
+        //         printf("sENDING NO\n");
+
+        //         if (send(sock, sen, 2, 0) < 0)
+        //         {
+        //             fprintf(stderr, "sending failure\n");
+        //         }
+        //         count_to_2 = 0;
+        //     }
+        //     break;
         default:
+
+            printf("receiving message\n");
+
+
+            if (check_signin == 0)
+            {
+                get_password(&password, 0);
+                insert_into_db_users(db, name, password);
+            }
+
             //insert_into_db_message(db, name, msg);
             //get_from_db_messages(db);
-
-            printf("On the server: %s\n", msg);
-
-            send_msg = mx_strjoin(name, ":  ");
-            send_msg = mx_strjoin(send_msg, msg);
-
-            printf("On the server send_msg: %s\n", send_msg);
-
-            // strcpy(send_msg, name);
-            // strcat(send_msg, ":  ");
-            // strcat(send_msg, msg);
+            strcpy(send_msg, name);
+            strcat(send_msg, ":  ");
+            strcat(send_msg, msg);
             //send_everyone(send_msg, sock, &mutex_GLOBAL, clients_GLOBAL, &n_GLOBAL);
             send_everyone(send_msg, sock, &mutex_GLOBAL, &ids);
 
-            //memset(msg, strlen(msg), '\0'); //! NEW
+            memset(msg, strlen(msg), '\0'); //! NEW
         }
-        memset(msg, strlen(msg), '\0');
-        memset(send_msg, strlen(send_msg), '\0');
+        //memset(msg, strlen(msg), '\0');
         count_to_2++;
+
+        printf("Now count is: %i\n", count_to_2);
+
     }
 
     return NULL; // to silence warning
@@ -264,15 +423,13 @@ int main(int argc, char *argv[])
 
     static sqlite3 *db; // CREATE DATABASE
     create_table(db);
-
+    get_from_db_users(db);
 
     t_list *ids = NULL;
-
 
     pid_t pid;
     pid = getpid();
     printf("Process ID is: %d\n", pid); //! PID Printing
-
 
     while (1)
     {
@@ -280,56 +437,16 @@ int main(int argc, char *argv[])
         {
             fprintf(stderr, "accepting failure\n");
         }
-        // mx_printstr("CREATED SOCKET IS: ");
-        // mx_printint(Client_sock);
-        // mx_printstr("\n");
-
         pthread_mutex_lock(&mutex_GLOBAL);
-        //clients_GLOBAL[n_GLOBAL] = Client_sock;
 
         mx_push_back(&ids, mx_strdup(mx_itoa(Client_sock)));
-
-        // for (t_list* i = clients_GLOBAL; i != NULL; i = i->next) {
-        //     mx_printstr("DATA: ");
-        //     mx_printint(*((int*)i->data));
-        //     mx_printstr("\n");
-        // }
-
-        //mx_static_push_back(&clients_GLOBAL, &Client_sock);
-        //n_GLOBAL++;
-
-        //get_N(&n_GLOBAL, 1);         // to give a value
         get_mutex(&mutex_GLOBAL, 1); // to give a value
-        //get_arr(clients_GLOBAL, 1);  // to give a value
-        get_list(&ids, 1);
-        getDataBase(db, 1);          // to give a value
 
-        //get_list(&clients_GLOBAL, 1);
-        //get_list(&Client_sock, 1);
+        get_list(&ids, 1);
+        getDataBase(db, 1); // to give a value
 
         pthread_create(&recvt, NULL, (void *)recvmg, &Client_sock);
         pthread_mutex_unlock(&mutex_GLOBAL);
-
-        //client* A = NULL;
-
-        // while(1) {
-        //     get_struct(&A, 0);
-        //     if (A) {
-        //         mx_printstr("Got data\n");
-
-        //         char** a = mx_strsplit(A->name_password, ' ');
-
-        //         mx_printstr("A name is: ");
-        //         mx_printstr(a[0]);
-        //         mx_printstr("\n");
-
-        //         mx_printstr("A password is: ");
-        //         mx_printstr(a[1]);
-        //         mx_printstr("\n");
-
-        //         break;
-        //     }
-        // }
     }
     return 0;
 }

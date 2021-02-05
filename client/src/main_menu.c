@@ -1,4 +1,4 @@
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 void get_text_entry(GtkWidget **textEntry, bool check)
 {
@@ -13,7 +13,8 @@ void get_text_entry(GtkWidget **textEntry, bool check)
     }
 }
 
-void get_buffer(GtkTextBuffer **buffer, bool check) {
+void get_buffer(GtkTextBuffer **buffer, bool check)
+{
     static GtkTextBuffer *t;
     if (check)
     {
@@ -25,7 +26,8 @@ void get_buffer(GtkTextBuffer **buffer, bool check) {
     }
 }
 
-void get_iter(GtkTextIter *iter, bool check) {
+void get_iter(GtkTextIter *iter, bool check)
+{
     static GtkTextIter t;
     if (check)
     {
@@ -54,7 +56,7 @@ void get_iter(GtkTextIter *iter, bool check) {
 void *recvmg_new(void *my_sock)
 {
     printf("Waintig for messages to write\n");
-    char* msg = mx_strnew(500);
+    char *msg = mx_strnew(500);
 
     //char* msg = mx_strnew(500);
     //get_array(&msg, 0);
@@ -106,7 +108,7 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*
         fprintf(stderr, "%d\n", sock);
 
         //printf("%s\n", text);
-        
+
         if (send(sock, text, strlen(text), 0) < 0)
         {
             fprintf(stderr, "sending failure\n");
@@ -145,9 +147,6 @@ void main_menu()
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
-
-
-    
 
     int sock = 0;
     get_sockid(&sock, 0);

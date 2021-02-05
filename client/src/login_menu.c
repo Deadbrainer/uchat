@@ -1,112 +1,267 @@
-#include "../inc/uchat.h"
+#include "../inc/client.h"
 
 void main_menu_test()
 {
-    main_menu();
     gtk_widget_destroy(log_window);
+    main_menu();
 }
 
-void button_clicked(GtkWidget *button, gpointer data) // TODO: THIS
+void get_if_login_ok(bool *flag, int check)
 {
-    const char *login_text;
-    const char *password_text;
+    static bool n;
+
+    if (check)
+    {
+        n = *flag;
+    }
+    else
+    {
+        *flag = n;
+    }
+}
+
+void get_login(char **login, int check)
+{
+    static char* n;
+
+    if (check)
+    {
+        n = *login;
+    }
+    else
+    {
+        *login = n;
+    }
+}
+
+void login_clicked_username(GtkWidget *button, gpointer data)
+{
     int sock = 0;
     get_sockid(&sock, 0);
-    fprintf(stderr, "%d\n", sock);
-    login_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
-    password_text = gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
-    char *to_send = mx_strjoin(login_text, " ");
-    to_send = mx_strjoin(to_send, password_text);
+    //static bool login_ok = 0;
+    char *username = (char *)gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
 
-    if (send(sock, to_send, mx_strlen(to_send), 0) < 0)
+    get_login(&username, 1); //!assign
+
+    // if (send(sock, "L\0", 2, 0) < 0) {
+    //     fprintf(stderr, "sending failure\n");
+    // } else {
+    //     printf("sent L\n");
+    // }
+
+    // if (send(sock, username, mx_strlen(username), 0) < 0)
+    // {
+    //     fprintf(stderr, "sending failure\n");
+    // } else {
+    //     printf("sent login %s\n", username);
+    // }
+
+    // int len = 0;
+    // char *rec = mx_strnew(8);
+    // if ((len = recv(sock, rec, 32, 0))) {
+    //     printf("Got answer(login) %s\n", rec);
+    // }
+
+    // // printf("GOT: %s\n", rec);
+    // if (mx_strcmp(rec, "Y") == 0)
+    // {
+    //     login_ok = 1;
+    //     get_if_login_ok(&login_ok, 1);
+    // }
+    // else if (mx_strcmp(rec, "N") == 0)
+    // {
+    //     login_menu(false);
+    // }
+    // else
+    // {
+    //     printf("NIHUYA NE PRISHLO\n");
+    // }
+}
+
+void login_clicked_password(GtkWidget *button, gpointer data)
+{
+    int sock = 0;
+    get_sockid(&sock, 0);
+    //static bool password_ok = 0;
+    //bool login_ok = 0;
+    char *password = (char *)gtk_entry_get_text(GTK_ENTRY((GtkWidget *)data));
+
+    char* username;
+    get_login(&username, 0);
+
+
+    username = mx_strjoin("L ", username);
+    username = mx_strjoin(username, " ");
+    username = mx_strjoin(username, password);
+
+    if (send(sock, username, mx_strlen(username), 0) < 0)
     {
         fprintf(stderr, "sending failure\n");
+    } else {
+        printf("sent string: %s\n", username);
     }
 
     int len = 0;
-    char* rec = mx_strnew(8);
-    len = recv(sock, rec, 32, 0);
+    char *rec = mx_strnew(8);
 
-    printf("GOT: %s\n", rec);
-    if (mx_strcmp(rec, "N") == 0) {
-        //printf("NEPRAVULNO\n");
-        main_menu_test();
-    } else if (mx_strcmp(rec, "Y") == 0){
-        //printf("PRAVULNO\n");
-        login_menu(true);
-    } else {
-        printf("NIHUYA NE PRISHLO\n");
+    if ((len = recv(sock, rec, 3, 0))) {
+        printf("Got answer: %s\n", rec);
     }
 
-    //send(sock, to_send, mx_strlen(to_send), 0);
-    /*if (strcmp(password_text, password) == 0)
-        printf("Access granted!\n");
+    // printf("GOT: %s\n", rec);
+    if (mx_strcmp(rec, "YY") == 0)
+    {
+        main_menu_test();
+        //password_ok = 1;
+    }
+    else if ((mx_strcmp(rec, "YN") == 0) || (mx_strcmp(rec, "NY") == 0))
+    {
+        login_menu(false);
+    }
     else
-        printf("Access denied!\n");*/
+    {
+        printf("Unexpected answer: %s\n", rec);
+    }
+
+    // get_if_login_ok(&login_ok, 0);
+    // if (login_ok == 1 && password_ok == 1)
+    // {
+    //     main_menu_test();
+    // }
 }
 
 void login_menu(bool wrong_login)
 {
-    GtkWidget *username_label, *password_label;
-    GtkWidget *username_entry, *password_entry;
-    GtkWidget *enter_button;
-    GtkWidget *hbox1, *hbox2, *vbox;
-    GtkWidget *reg_button;
+    GtkWidget *box;
+    GtkWidget *stack;
+    GtkWidget *window;
+    GtkWidget *switcher;
+
+    GtkWidget *log_username_label, *log_password_label, *log_error_label;
+    GtkWidget *log_username_entry, *log_password_entry;
+    GtkWidget *log_ok_button;
+    GtkWidget *log_hbox_username, *log_hbox_password, *log_hbox_error;
+    GtkWidget *log_vbox;
+
+    GtkWidget *reg_username_label, *reg_password_label, *reg_password_label_repeat, *reg_error_label;
+    GtkWidget *reg_username_entry, *reg_password_entry, *reg_password_entry_repeat;
+    GtkWidget *reg_ok_button;
+    GtkWidget *reg_hbox_username, *reg_hbox_password, *reg_hbox_password_repeat, *reg_hbox_error;
+    GtkWidget *reg_vbox;
 
     // Window creation
-    if(!wrong_login)
-    {
-        log_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        new_window(log_window, -1, -1, FALSE, 2, "Uchat Log In");
-    }
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "UCHAT");
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 
-    // application destruction
-    g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL); //пояснение сигналов хедере
+    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(closeApp), NULL);
 
     //text befory entry fields
-    username_label = gtk_label_new("Login: ");
-    gtk_label_set_width_chars(GTK_LABEL(username_label), 10);
-    password_label = gtk_label_new("Password: ");
-    gtk_label_set_width_chars(GTK_LABEL(password_label), 10);
-
-    //entry fields
-    username_entry = gtk_entry_new();
-    password_entry = gtk_entry_new();
-    gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE); //* makes password hidden
-
-    enter_button = gtk_button_new_with_label("Login");
-    g_signal_connect(G_OBJECT(enter_button), "clicked", G_CALLBACK(button_clicked), username_entry);
-
-    /* Рома: мы не настолько продвинутые (51 line)
-    button_check = gtk_check_button_new_with_label("Remember password?"); // TODO: This, without listener BTW */
-
-    //button listener
-    reg_button = gtk_button_new_with_label("Register");
-    g_signal_connect(G_OBJECT(reg_button), "clicked", G_CALLBACK(window_switch), log_window); //Opens reg window
-
-    //Packing buttons and fields
-    hbox1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-
-    gtk_box_pack_start(GTK_BOX(hbox1), username_label, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(hbox1), username_entry, TRUE, FALSE, 5);
-
-    gtk_box_pack_start(GTK_BOX(hbox2), password_label, TRUE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(hbox2), password_entry, TRUE, FALSE, 5);
-
-    gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
-    if (wrong_login)
+    log_username_label = gtk_label_new("Login: ");
+    log_password_label = gtk_label_new("Password: ");
+    log_error_label = gtk_label_new(NULL);
+    if (!wrong_login)
     {
-        GtkWidget *wrong_pass = gtk_label_new("Wrong login or password");
-        gtk_box_pack_start(GTK_BOX(vbox), wrong_pass, FALSE, FALSE, 1);
+        gtk_label_set_markup(GTK_LABEL(log_error_label), "<span foreground='#ff0000'>error</span>");
     }
-    //gtk_box_pack_start(GTK_BOX(vbox), button_check, FALSE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(vbox), enter_button, FALSE, FALSE, 5);
-    gtk_box_pack_start(GTK_BOX(vbox), reg_button, FALSE, FALSE, 5);
+    gtk_label_set_width_chars(GTK_LABEL(log_username_label), 12);
+    gtk_label_set_width_chars(GTK_LABEL(log_password_label), 12);
+    gtk_label_set_width_chars(GTK_LABEL(log_error_label), 12);
 
-    //required to show everything
-    gtk_container_add(GTK_CONTAINER(log_window), vbox);
-    gtk_widget_show_all(log_window);
+    log_username_entry = gtk_entry_new();
+    log_password_entry = gtk_entry_new();
+    gtk_entry_set_visibility(GTK_ENTRY(log_password_entry), FALSE);
+
+    log_ok_button = gtk_button_new_with_label("Sign in");
+
+    g_signal_connect(G_OBJECT(log_ok_button), "clicked", G_CALLBACK(login_clicked_username), log_username_entry);
+    g_signal_connect(G_OBJECT(log_ok_button), "clicked", G_CALLBACK(login_clicked_password), log_password_entry);
+
+    log_hbox_username = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    log_hbox_password = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    log_hbox_error = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+    log_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
+    gtk_box_pack_start(GTK_BOX(log_hbox_username), log_username_label, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(log_hbox_username), log_username_entry, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(log_hbox_password), log_password_label, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(log_hbox_password), log_password_entry, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(log_hbox_error), log_error_label, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(log_vbox), log_hbox_username, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(log_vbox), log_hbox_password, FALSE, FALSE, 5);
+    gtk_box_pack_end(GTK_BOX(log_vbox), log_ok_button, FALSE, FALSE, 5);
+    gtk_box_pack_end(GTK_BOX(log_vbox), log_hbox_error, FALSE, FALSE, 5);
+
+    // Registration
+
+    reg_username_label = gtk_label_new("Login: ");
+    reg_password_label = gtk_label_new("Password: ");
+    reg_password_label_repeat = gtk_label_new("Repeat: ");
+    reg_error_label = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(reg_error_label), "<span foreground='#ff0000'>error</span>");
+    gtk_label_set_width_chars(GTK_LABEL(reg_username_label), 12);
+    gtk_label_set_width_chars(GTK_LABEL(reg_password_label), 12);
+    gtk_label_set_width_chars(GTK_LABEL(reg_password_label_repeat), 12);
+    gtk_label_set_width_chars(GTK_LABEL(reg_error_label), 12);
+
+    reg_username_entry = gtk_entry_new();
+    reg_password_entry = gtk_entry_new();
+    reg_password_entry_repeat = gtk_entry_new();
+    gtk_entry_set_visibility(GTK_ENTRY(reg_password_entry), FALSE);
+    gtk_entry_set_visibility(GTK_ENTRY(reg_password_entry_repeat), FALSE);
+
+    reg_ok_button = gtk_button_new_with_label("Sign up");
+    //g_signal_connect(G_OBJECT(reg_ok_button), "clicked", G_CALLBACK(reg_clicked), reg_password_entry);
+
+    reg_hbox_username = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    reg_hbox_password = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    reg_hbox_password_repeat = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    reg_hbox_error = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+    reg_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
+    gtk_box_pack_start(GTK_BOX(reg_hbox_username), reg_username_label, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(reg_hbox_username), reg_username_entry, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(reg_hbox_password), reg_password_label, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(reg_hbox_password), reg_password_entry, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(reg_hbox_password_repeat), reg_password_label_repeat, TRUE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(reg_hbox_password_repeat), reg_password_entry_repeat, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(reg_hbox_error), reg_error_label, TRUE, FALSE, 5);
+
+    gtk_box_pack_start(GTK_BOX(reg_vbox), reg_hbox_username, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(reg_vbox), reg_hbox_password, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(reg_vbox), reg_hbox_password_repeat, FALSE, FALSE, 5);
+    gtk_box_pack_end(GTK_BOX(reg_vbox), reg_ok_button, FALSE, FALSE, 5);
+    gtk_box_pack_end(GTK_BOX(reg_vbox), reg_hbox_error, FALSE, FALSE, 5);
+
+    // Switcher
+
+    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+    stack = gtk_stack_new();
+    switcher = gtk_stack_switcher_new();
+
+    gtk_stack_add_titled(GTK_STACK(stack), log_vbox, "Sign in", "Sign in");
+    gtk_stack_add_titled(GTK_STACK(stack), reg_vbox, "Sign up", "Sign up");
+
+    gtk_widget_set_halign(switcher, GTK_ALIGN_CENTER);
+
+    gtk_stack_switcher_set_stack(GTK_STACK_SWITCHER(switcher), GTK_STACK(stack));
+    gtk_box_pack_start(GTK_BOX(box), switcher, FALSE, FALSE, 6);
+    gtk_box_pack_start(GTK_BOX(box), stack, TRUE, TRUE, 6);
+
+    // End
+    gtk_container_add(GTK_CONTAINER(window), box);
+
+    g_signal_connect(G_OBJECT(window), "destroy", gtk_main_quit, NULL);
+
+    gtk_widget_show_all(window);
 }
