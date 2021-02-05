@@ -146,6 +146,9 @@ void main_menu()
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
 
+
+    
+
     int sock = 0;
     get_sockid(&sock, 0);
     fprintf(stderr, "%d\n", sock);
