@@ -8,6 +8,12 @@
 GtkWidget *log_window;
 GtkWidget *reg_window;
 GtkWidget *main_window;
+GtkWidget *addUserWindow;
+
+struct all_windows
+{
+
+};
 
 struct all_text_buffers
 {
