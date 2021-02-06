@@ -1,12 +1,13 @@
 #include "../inc/uchat.h"
 
-GtkWidget *sidebar;
 char *pages[] = {
 	"Welcome to Gtk+3.0",
 	"page2",
 	"page3",
 	NULL
 };
+
+t_list *chatlist = NULL;
 
 void get_text_entry(GtkWidget **textEntry, bool check)
 {
@@ -61,7 +62,7 @@ void button_pressed()
     gtk_widget_show_all(addUserWindow);
 }
 
-GtkWidget *textAction(GtkWidget **stack)
+GtkWidget *textAction(GtkWidget **stack, int pos)
 {
     GtkWidget *textArea = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textArea), false);
@@ -76,7 +77,7 @@ GtkWidget *textAction(GtkWidget **stack)
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_box_pack_start(GTK_BOX(vbox), scrolledwindow, true, true, 5);
 
-    GtkWidget *button = gtk_button_new_with_label("+");
+    GtkWidget *button = gtk_button_new_with_label("Add Friend");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(button_pressed), NULL);
 
     GtkWidget *hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -88,16 +89,15 @@ GtkWidget *textAction(GtkWidget **stack)
     gtk_box_pack_start(GTK_BOX(hbox2), textEntry, true, true, 5);
     gtk_box_pack_start(GTK_BOX(hbox2), button, false, false, 0);
     gtk_box_pack_end(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
-    gtk_stack_add_named(GTK_STACK(*stack), vbox, pages[0]);
-    gtk_container_child_set(GTK_CONTAINER(*stack), vbox, "title", pages[0], NULL);
+    gtk_stack_add_named(GTK_STACK(*stack), vbox, pages[pos]);
+    gtk_container_child_set(GTK_CONTAINER(*stack), vbox, "title", pages[pos], NULL);
     return *stack;
 }
 
 
 void main_menu()
 {
-    //!GtkWidget *textArea = gtk_text_view_new();
- 
+    GtkWidget *sidebar;
     sidebar = gtk_stack_sidebar_new();
 
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -108,17 +108,16 @@ void main_menu()
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
     g_signal_connect(G_OBJECT(main_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
-    //!GtkWidget *stack = gtk_stack_new();
     GtkWidget *stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);//The effect of switching is upward
 	gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(stack));
     gtk_box_pack_start(GTK_BOX(hbox), gtk_separator_new(GTK_ORIENTATION_VERTICAL), FALSE, FALSE, 0);     
 
 
-    stack = textAction(&stack);                          
+    stack = textAction(&stack, 0);      
+    stack = textAction(&stack, 1);                     
 	gtk_box_pack_start(GTK_BOX(hbox), stack, TRUE, TRUE, 0);
    
-
     //gtk_label_set_selectable(block, TRUE)
 
     gtk_container_add(GTK_CONTAINER(main_window), hbox);

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 GtkWidget *log_window;
 GtkWidget *reg_window;
 GtkWidget *main_window;
