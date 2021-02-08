@@ -8,16 +8,31 @@
 #include <stdbool.h>
 
 // Database Functions
+// Create Tables
 void create_table(sqlite3 *db);
 void create_table_users(sqlite3 *db, char *zErrMsg, int rc, char *sql);
 void create_table_messages(sqlite3 *db, char *zErrMsg, int rc, char *sql);
+void create_table_rooms(sqlite3 *db, char *zErrMsg, int rc, char *sql);
+
+// Callback
 int callback(void *NotUsed, int argc, char **argv, char **azColName);
-void get_from_db_users(sqlite3 *db);
+
+// Insert into db
 void insert_into_db_users(sqlite3 *db, char *name, char *password);
-t_list *get_usernames_from_db(sqlite3 *db);
 void insert_into_db_message(sqlite3 *db, char *name, char *msg);
+void insert_into_db_room(sqlite3 *db, char *room_name, char *username);
+void add_idroom_into_user(sqlite3 *db, char *username, char *id);
+void add_user_into_room(sqlite3 *db, char *username, char *id);
+
+// Get from db
 void get_from_db_messages(sqlite3 *db);
+void get_from_db_users(sqlite3 *db);
+t_list *get_usernames_from_db(sqlite3 *db);
 char *get_password_from_db(sqlite3 *db, char *name);
+char **get_idrooms_from_users(sqlite3 *db);
+char *get_roomnames_from_rooms(sqlite3 *db, char *id);
+char *get_usernames_from_rooms(sqlite3 *db, char *id);
+char *get_roomid_from_users(sqlite3 *db, char *name);
 
 //Getters
 void getDataBase(sqlite3 *x, int check);

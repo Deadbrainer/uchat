@@ -43,7 +43,7 @@ void new_window(GtkWidget *win, int x, int z, bool resize, int border, char titl
 void window_switch(GtkWidget *window, gpointer data);
 
 //Opens login menu
-void login_menu(bool wrong_login);
+void login_menu();
 
 //Макс блять сделай с этим, что-то. Оно ща в uchat.c (Я на 90% уверен, что он нихуя не сделает)
 void login_clicked_username(GtkWidget *button, gpointer data);
@@ -64,6 +64,9 @@ void get_if_login_ok(bool *flag, int check);
 void get_login(char **login, int check);
 void get_array(char **array, int check);
 void get_password(char **password, int check);
+void get_text_entry(GtkWidget **textEntry, bool check);
+void get_buffer(GtkTextBuffer **buffer, bool check);
+void get_iter(GtkTextIter *iter, bool check);
 
 //Registration Handler
 void reg_clicked_username(GtkWidget *button, gpointer data);

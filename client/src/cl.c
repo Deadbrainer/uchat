@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     get_array(&msg, 1); // assign value
     get_sockid(&sock, 1);
 
-    login_menu(true);
+    login_menu();
     gtk_main();
 
     close(sock);

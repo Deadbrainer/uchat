@@ -122,6 +122,22 @@ void *recvmg(void *client_sock)
                 fprintf(stderr, "sending failure\n");
             }
             mx_del_strarr(&cut_str);
+            if ((check_signin == 1 && mx_strcmp("YY", send_back) == 0) || (check_signin == 0 && mx_strcmp("NN", send_back) == 0))
+            {
+                char *roomname = NULL;
+                char **id_rooms = get_idrooms_from_users(db);
+                if (*id_rooms != NULL)
+                {
+                    while (id_rooms)
+                    {
+                        roomname = get_roomnames_from_rooms(db, *id_rooms);
+                        roomname = mx_strjoin(roomname, " ");
+                        roomname = mx_strjoin(roomname, *id_rooms);
+                        send(sock, roomname, mx_strlen(roomname), 0);
+                        id_rooms++;
+                    }
+                }
+            }
             break;
         default:
 
@@ -129,8 +145,25 @@ void *recvmg(void *client_sock)
             {
                 get_password(&password, 0);
                 insert_into_db_users(db, name, password);
-                get_from_db_users(db);
             }
+
+            if (msg[0] == '\r' && msg[1] != '\r') // create room spliting using \v
+            {
+                char **create_room = mx_strsplit(msg, '\v');
+                insert_into_db_room(db, create_room[1], name);
+                if (msg[1] == '\r' && msg[2] != '\r') // add user to the room (1 = Username, 2 = roomid)
+                {
+                    char **add_user = mx_strsplit(msg, '\v');
+                    add_idroom_into_user(db, add_user[1], add_user[2]);
+                    add_user_into_room(db, add_user[1], add_user[2]);
+                    send(sock, roomname, mx_strlen(roomname), 0);
+                    if (msg[2] == '\r') // get messages from room
+                    {
+                    }
+                }
+            }
+
+            //if()
 
             //insert_into_db_message(db, name, msg);
             //get_from_db_messages(db);

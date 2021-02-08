@@ -1,44 +1,5 @@
 #include "../inc/client.h"
 
-void get_text_entry(GtkWidget **textEntry, bool check)
-{
-    static GtkWidget *t;
-    if (check)
-    {
-        t = *textEntry;
-    }
-    else
-    {
-        *textEntry = t;
-    }
-}
-
-void get_buffer(GtkTextBuffer **buffer, bool check)
-{
-    static GtkTextBuffer *t;
-    if (check)
-    {
-        t = *buffer;
-    }
-    else
-    {
-        *buffer = t;
-    }
-}
-
-void get_iter(GtkTextIter *iter, bool check)
-{
-    static GtkTextIter t;
-    if (check)
-    {
-        t = *iter;
-    }
-    else
-    {
-        *iter = t;
-    }
-}
-
 void *recvmg_new(void *my_sock)
 {
     printf("Waintig for messages to write\n");
@@ -110,8 +71,22 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextBuffer *buffer /*
     return false;
 }
 
+void add_chat(const gchar *title, gpointer data)
+{
+    GtkWidget *stack = (GtkWidget *)data;
+
+    GtkWidget *label = gtk_label_new(title);
+    gtk_stack_add_named(GTK_STACK(stack), label, title);
+    gtk_container_child_set(GTK_CONTAINER(stack), label, "title", title, NULL);
+}
+
 void main_menu()
 {
+    GtkWidget *sidebar = gtk_stack_sidebar_new();
+    GtkWidget *stack = gtk_stack_new();
+    GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+
     GtkWidget *textArea = gtk_text_view_new();
     GtkWidget *scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
     GtkWidget *textEntry = gtk_entry_new();
@@ -130,6 +105,19 @@ void main_menu()
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
 
+    sidebar = gtk_stack_sidebar_new();
+    stack = gtk_stack_new();
+    separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+    gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+    gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(stack));
+
+    // packing
+    gtk_box_pack_start(GTK_BOX(hbox), sidebar, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox), stack, TRUE, TRUE, 0);
+
     int sock = 0;
     get_sockid(&sock, 0);
     fprintf(stderr, "%d\n", sock);
@@ -145,8 +133,12 @@ void main_menu()
     gtk_box_pack_start(GTK_BOX(vbox), scrolledwindow, true, true, 5);
     gtk_box_pack_end(GTK_BOX(vbox), textEntry, FALSE, FALSE, 5);
 
+    add_chat("dasdasda", stack);
+    add_chat("das5235235dasda", stack);
+    add_chat("dasdgdfgdfgdfgdfasda", stack);
     //gtk_label_set_selectable(block, TRUE)
 
-    gtk_container_add(GTK_CONTAINER(main_window), vbox);
+    //gtk_container_add(GTK_CONTAINER(main_window), vbox);
+    gtk_container_add(GTK_CONTAINER(main_window), hbox);
     gtk_widget_show_all(main_window);
 }

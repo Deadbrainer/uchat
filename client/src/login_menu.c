@@ -6,7 +6,7 @@ void main_menu_test()
     gtk_widget_destroy(welcome_window);
 }
 
-void login_menu(bool wrong_login)
+void login_menu()
 {
     GtkWidget *box;
     GtkWidget *stack;
@@ -135,8 +135,6 @@ void login_menu(bool wrong_login)
 
     // End
     gtk_container_add(GTK_CONTAINER(welcome_window), box);
-
-    g_signal_connect(G_OBJECT(welcome_window), "destroy", gtk_main_quit, NULL);
 
     gtk_widget_show_all(welcome_window);
 }

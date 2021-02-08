@@ -82,3 +82,42 @@ void get_array(char **array, int check)
         *array = n;
     }
 }
+
+void get_text_entry(GtkWidget **textEntry, bool check)
+{
+    static GtkWidget *t;
+    if (check)
+    {
+        t = *textEntry;
+    }
+    else
+    {
+        *textEntry = t;
+    }
+}
+
+void get_buffer(GtkTextBuffer **buffer, bool check)
+{
+    static GtkTextBuffer *t;
+    if (check)
+    {
+        t = *buffer;
+    }
+    else
+    {
+        *buffer = t;
+    }
+}
+
+void get_iter(GtkTextIter *iter, bool check)
+{
+    static GtkTextIter t;
+    if (check)
+    {
+        t = *iter;
+    }
+    else
+    {
+        *iter = t;
+    }
+}
