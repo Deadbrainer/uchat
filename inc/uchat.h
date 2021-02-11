@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-
+#include "../../libmx/inc/libmx.h"
 
 GtkWidget *log_window;
 GtkWidget *reg_window;

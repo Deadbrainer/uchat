@@ -6,7 +6,7 @@ BINARY = uchat
 all: $(BINARY)
 
 $(BINARY):
-	clang  $(SRC) -o $(BINARY) `pkg-config --cflags --libs gtk+-3.0`
+	clang  $(SRC) ../../libmx/libmx.a -o $(BINARY) `pkg-config --cflags --libs gtk+-3.0`
 
 uninstall: clean
 	rm -rf $(BINARY)
