@@ -1,26 +1,22 @@
 #include "../inc/uchat.h"
 
-char *pages[] = {
-	"Welcome to Gtk+3.0",
-	"page2",
-	"page3",
-	NULL
-};
+GdkEvent *k_event;
 
-GdkEvent *event_k;
-
-// int do_event(GtkWidget *widget, GdkEventKey *event)
-// {
-    // if(event->keyval == GDK_BUTTON_SECONDARY)
-    // {
-        // gtk_main_do_event(event_k);
-    // }
-    // return false;
-// }
-
-int on_button_press(GtkWidget *widget, GdkEventButton *b_event, GtkTextView *textview)
+int on_button_press(GtkWidget *textview, GdkEventButton *b_event, gpointer *data)
 {
- return false;
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+    GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
+    GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
+    GtkTextIter *iter;
+
+    k_event = gdk_event_new(GDK_BUTTON_SECONDARY);
+    gtk_widget_add_events(textview, GDK_BUTTON_SECONDARY);
+
+    if(gtk_text_tag_event(tag, G_OBJECT(textview), k_event, iter))
+    {
+        printf("Fuck You");
+    }
+    return false;
 }
 
 int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
@@ -29,17 +25,8 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
     GtkTextIter citer;
     GtkTextMark *cursor;
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-
-    //GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
-
     GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
     GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
-
-    event_k = gdk_event_new(GDK_BUTTON_SECONDARY);
-    //if (b_event->type == GDK_BUTTON_PRESS)
-    //{
-    //    gtk_main_quit();
-    //}
 
     if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
     {
@@ -49,14 +36,15 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
         gtk_text_iter_forward_to_end(&iter);
         gtk_text_buffer_place_cursor(buffer, &iter);
 
-
         gtk_text_buffer_insert_with_tags(buffer, &iter, text, -1, tag, NULL);
         gtk_text_buffer_insert(buffer, &iter, "\n\n", -1);
-
-        gtk_text_buffer_insert(buffer, &iter, "\n test for no edit \n\n", -1);
-
-
         gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+        k_event = gdk_event_new(GDK_KEY_PRESS);
+        if(gtk_text_tag_event(tag, G_OBJECT(textview), k_event, &iter))
+        {
+            printf("Fuck You");
+        }
     }
     return false;
 }
@@ -74,18 +62,18 @@ void button_pressed()
     gtk_widget_show_all(addUserWindow);
 }
 
-GtkWidget *textAction(GtkWidget **stack, int pos)
+GtkWidget *textAction(GtkWidget **stack, char *text)
 {
     GtkWidget *textArea = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textArea), false);
-    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), false);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), true);
     gtk_widget_add_events(textArea, GDK_BUTTON_PRESS_MASK);
-    g_signal_connect(G_OBJECT(textArea), "button-press-event", G_CALLBACK(on_key_press), textArea);
+    g_signal_connect(G_OBJECT(textArea), "button-press-event", G_CALLBACK(on_button_press), NULL);
 
     GtkTextBuffer *buffer;
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
 
-    GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
+    GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", false, NULL);
 
     GtkWidget *scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(scrolledwindow), textArea);
@@ -104,8 +92,8 @@ GtkWidget *textAction(GtkWidget **stack, int pos)
     gtk_box_pack_start(GTK_BOX(hbox2), textEntry, true, true, 5);
     gtk_box_pack_start(GTK_BOX(hbox2), button, false, false, 0);
     gtk_box_pack_end(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
-    gtk_stack_add_named(GTK_STACK(*stack), vbox, pages[pos]);
-    gtk_container_child_set(GTK_CONTAINER(*stack), vbox, "title", pages[pos], NULL);
+    gtk_stack_add_named(GTK_STACK(*stack), vbox, text);
+    gtk_container_child_set(GTK_CONTAINER(*stack), vbox, "title", text, NULL);
     return *stack;
 }
 
@@ -129,10 +117,11 @@ void main_menu()
 	gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(stack));
     gtk_box_pack_start(GTK_BOX(hbox), gtk_separator_new(GTK_ORIENTATION_VERTICAL), FALSE, FALSE, 0);     
 
-    stack = textAction(&stack, 0);      
-    stack = textAction(&stack, 1);                     
+    stack = textAction(&stack, "Games");      
+    stack = textAction(&stack, "Job");                     
 	gtk_box_pack_start(GTK_BOX(hbox), stack, TRUE, TRUE, 0);
 
     gtk_container_add(GTK_CONTAINER(main_window), hbox);
     gtk_widget_show_all(main_window);
+
 }
