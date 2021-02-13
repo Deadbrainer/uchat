@@ -16,10 +16,6 @@ struct all_windows
 
 };
 
-struct all_text_buffers
-{
-      GtkTextBuffer *buffer;
-};
 
 /*
 g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL);

@@ -9,42 +9,41 @@ char *pages[] = {
 
 GdkEvent *event_k;
 
-int do_event(GtkWidget *widget, GdkEventKey *event)
+// int do_event(GtkWidget *widget, GdkEventKey *event)
+// {
+    // if(event->keyval == GDK_BUTTON_SECONDARY)
+    // {
+        // gtk_main_do_event(event_k);
+    // }
+    // return false;
+// }
+
+int on_button_press(GtkWidget *widget, GdkEventButton *b_event, GtkTextView *textview)
 {
-    if(event->keyval == GDK_BUTTON_SECONDARY)
-    {
-        gtk_main_do_event(event_k);
-    }
-    return false;
+ return false;
 }
 
 int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
 {
+    GtkTextIter iter;
+    GtkTextIter citer;
+    GtkTextMark *cursor;
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+
+    //GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
+
+    GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
+    GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
+
+    event_k = gdk_event_new(GDK_BUTTON_SECONDARY);
+    //if (b_event->type == GDK_BUTTON_PRESS)
+    //{
+    //    gtk_main_quit();
+    //}
+
     if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
     {
-        GtkTextIter iter;
-        GtkTextIter citer;
-        GtkTextMark *cursor;
-        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-
         const gchar *text = gtk_entry_get_text(GTK_ENTRY(widget));
-        //GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
-
-        GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
-        GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
-
-        event_k = gdk_event_new(GDK_BUTTON_SECONDARY);
-        while(gtk_text_tag_event(tag, G_OBJECT(textview), event_k, &iter))
-        {
-            printf("%s", "test");
-        }
-
-
-        //int sock = 0;
-        //get_sockid(&sock, 0);
-        //fprintf(stderr, "%d\n", sock);
-        //send();
-
         cursor = gtk_text_buffer_get_mark(buffer, "insert");
         gtk_text_buffer_get_iter_at_mark(buffer, &iter, cursor);
         gtk_text_iter_forward_to_end(&iter);
@@ -80,7 +79,8 @@ GtkWidget *textAction(GtkWidget **stack, int pos)
     GtkWidget *textArea = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textArea), false);
     gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), false);
-    g_signal_connect(G_OBJECT(textArea), "button-press-event", G_CALLBACK(do_event), NULL);
+    gtk_widget_add_events(textArea, GDK_BUTTON_PRESS_MASK);
+    g_signal_connect(G_OBJECT(textArea), "button-press-event", G_CALLBACK(on_key_press), textArea);
 
     GtkTextBuffer *buffer;
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
@@ -121,7 +121,6 @@ void main_menu()
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
-    gtk_widget_add_events(main_window, GDK_BUTTON_PRESS_MASK);
 
     g_signal_connect(G_OBJECT(main_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
@@ -129,7 +128,6 @@ void main_menu()
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);//The effect of switching is upward
 	gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(stack));
     gtk_box_pack_start(GTK_BOX(hbox), gtk_separator_new(GTK_ORIENTATION_VERTICAL), FALSE, FALSE, 0);     
-
 
     stack = textAction(&stack, 0);      
     stack = textAction(&stack, 1);                     
