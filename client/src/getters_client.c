@@ -1,18 +1,5 @@
 #include "../inc/client.h"
 
-void get_error_label(GtkWidget **log_error_label, bool check)
-{
-    static GtkWidget *t = NULL;
-    if (check)
-    {
-        t = *log_error_label;
-    }
-    else
-    {
-        *log_error_label = t;
-    }
-}
-
 void get_if_login_ok(bool *flag, int check)
 {
     static bool n;
@@ -47,11 +34,11 @@ void get_login(char **login, int check)
 
     if (check)
     {
-        n = *login;
+        n = mx_strdup(*login);
     }
     else
     {
-        *login = n;
+        *login = mx_strdup(n);
     }
 }
 
@@ -147,4 +134,16 @@ char *get_date()
     res = mx_strjoin(res, ":");
     res = mx_strjoin(res, mx_itoa(timeinfo->tm_min));
     return res;
+}
+
+void get_struct_socaddr(struct sockaddr_in **SocketIp, int check) {
+    static struct sockaddr_in *n;
+    if (check)
+    {
+        n = *SocketIp;
+    }
+    else
+    {
+        *SocketIp = n;
+    }
 }

@@ -314,3 +314,40 @@ char *get_date_from_message(sqlite3 *db, char *text)
 
     return date;
 }
+
+char **get_text_from_message(sqlite3 *db, int id)
+{
+    sqlite3_stmt *restt;
+    char **text = NULL;
+    int rc = sqlite3_open("uchat.db", &db);
+
+    if (rc != SQLITE_OK)
+    {
+
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+
+        return NULL;
+    }
+    rc = sqlite3_prepare_v2(db, "SELECT MESSAGE FROM MESSAGES WHERE ID_ROOM = ?", -1, &restt, 0);
+    sqlite3_bind_int(restt, 1, id);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Error int searching: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
+    }
+    while (sqlite3_step(restt) == SQLITE_ROW)
+    {
+        *text = mx_strnew(mx_strlen((char *)sqlite3_column_text(restt, 0)));
+        printf("%s\n", (char *)sqlite3_column_text(restt, 0));
+        *text = mx_strdup((char *)sqlite3_column_text(restt, 0));
+        text++;
+    }
+
+    sqlite3_finalize(restt);
+    sqlite3_close(db);
+
+    return text;
+}

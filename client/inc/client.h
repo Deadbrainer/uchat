@@ -17,6 +17,8 @@ GtkWidget *roomname_error_label;
 GtkWidget *add_user_error_label;
 GtkWidget *window;
 GtkWidget *main_window;
+
+void apply_css(GtkWidget *widget, GtkStyleProvider *provider);
 /** Creates new top-level window 
  * @param win which window
  * @param x width in pixels, or -1 to unset the default width
@@ -58,7 +60,6 @@ GtkWidget *add_chat(GtkWidget **stack, char *text);
 void main_menu();
 
 //Getters
-void get_error_label(GtkWidget **log_error_label, bool check);
 void get_if_login_ok(bool *flag, int check);
 void get_login(char **login, int check);
 void get_array(char **array, int check);
@@ -68,6 +69,7 @@ void get_buffer(GtkTextBuffer **buffer, bool check);
 void get_iter(GtkTextIter *iter, bool check);
 void get_list(t_list **x, int check);
 char *get_date();
+void get_struct_socaddr(struct sockaddr_in **SocketIp, int check);
 
 //Registration Handler
 void reg_clicked_username(GtkWidget *button, gpointer data);
@@ -81,6 +83,8 @@ void login_clicked_password(GtkWidget *button, gpointer data);
 void main_menu_test();
 
 void add_rooms();
+
+void try_reconnect();
 
 // chat
 GtkWidget *chat_stack;

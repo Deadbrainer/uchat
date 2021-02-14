@@ -3,25 +3,8 @@
 
 void closeApp(GtkWidget *window, gpointer data)
 {
+    int sock = 0;
+    get_sockid(&sock, 0);
+    send(sock, "\r\r\r\r\vclose", mx_strlen("\r\r\r\r\vclose"), 0);
     gtk_main_quit();
 }
-
-// void window_switch(GtkWidget *window, gpointer data)
-// {
-//     if(data == log_window)
-//     {
-//         login_menu(false);
-//         gtk_widget_destroy(reg_window);
-//     }
-//     else if(data == reg_window)
-//     {
-//         reg_menu(false);
-//         gtk_widget_destroy(log_window);
-//     }
-//     else if(data == main_window)
-//     {
-//         main_menu(false);
-//         gtk_widget_destroy(log_window);
-//     }
-//     else gtk_main_quit();
-// }

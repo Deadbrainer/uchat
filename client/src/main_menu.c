@@ -26,14 +26,47 @@ gboolean show_message(gpointer message)
 
 int on_button_press(GtkWidget *widget, GdkEventButton *event)
 {
-    if (event->type == GDK_BUTTON_PRESS)
+    current_roomname = gtk_stack_get_visible_child_name(GTK_STACK(chat_stack));
+    int sock = 0;
+    get_sockid(&sock, 0);
+    printf("%s\n", current_roomname);
+    if (send(sock, mx_strjoin("\r\r\r\r\r\v", current_roomname), mx_strlen(mx_strjoin("\r\r\r\r\r\v", current_roomname)), 0) > 0)
     {
-        if (gtk_stack_get_transition_running(GTK_STACK(chat_stack)))
+        printf("zaebis\n");
+    }
+    else
+    {
+        printf("nezaebis\n");
+    }
+
+    return false;
+}
+
+void try_reconnect()
+{
+    struct sockaddr_in *ServerIp = NULL;
+    get_struct_socaddr(&ServerIp, 0);
+
+    int sock;
+
+    while (1)
+    {
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (connect(sock, (struct sockaddr *)ServerIp, sizeof(*ServerIp)) == -1)
         {
-            current_roomname = gtk_stack_get_visible_child_name(GTK_STACK(chat_stack));
+            fprintf(stderr, "Connection failure\n");
+            sleep(1);
+        }
+        else
+        {
+            printf("Connected\n");
+            get_sockid(&sock, 1);
+            char *name;
+            get_login(&name, 0);
+            send(sock, mx_strjoin("\r\r\r\r\r\r\v", name), strlen(mx_strjoin("\r\r\r\r\r\r\v", name)), 0);
+            break;
         }
     }
-    return false;
 }
 
 int on_key_press(GtkWidget *text_entry, GdkEventKey *event, GtkTextView *textview)
@@ -68,15 +101,6 @@ int on_key_press(GtkWidget *text_entry, GdkEventKey *event, GtkTextView *textvie
         char *date = get_date();
         char *username = NULL;
         get_login(&username, 0);
-        while (1)
-        {
-            if (username != NULL)
-            {
-                break;
-            }
-            get_login(&username, 0);
-            sleep(1);
-        }
         const gchar *show_text = NULL;
         show_text = mx_strjoin(username, ": ");
         show_text = mx_strjoin(show_text, text);
@@ -98,7 +122,7 @@ GtkWidget *add_chat(GtkWidget **stack, char *text)
 
     GtkTextBuffer *buffer;
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
-    GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
+    //GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", true, NULL);
 
     GtkWidget *scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(scrolledwindow), textArea);
@@ -173,16 +197,22 @@ void *recvmg_new(void *my_sock)
         }
         else if (msg[3] == '\r')
         {
-            char **splited_name = mx_strsplit(msg, '\v');
-            printf("%s\n", splited_name[1]);
-            get_login(&splited_name[1], 1);
+            char **splited = mx_strsplit(msg, '\v');
+            current_roomname = gtk_stack_get_visible_child_name(GTK_STACK(chat_stack));
+            if (mx_strcmp(splited[1], current_roomname) == 0)
+            {
+                gchar *gtext = splited[2];
+                source = g_idle_source_new();
+                g_source_set_callback(source, show_message, gtext, NULL);
+                g_source_attach(source, context);
+                g_source_unref(source);
+            }
         }
 
         bzero(msg, 500);
     }
-
-    //free(&msg);
-
+    close(sock);
+    try_reconnect();
     return NULL; // to silence warning
 }
 
@@ -191,12 +221,13 @@ void main_menu()
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(main_window, 1000, 800, false, 0, "uchat");
     gtk_widget_add_events(main_window, GDK_BUTTON_PRESS_MASK);
-    g_signal_connect(G_OBJECT(main_window), "button-press-event", G_CALLBACK(on_button_press), NULL);
 
     // sidebar init
     GtkWidget *chat_sidebar = gtk_stack_sidebar_new();
     chat_stack = gtk_stack_new();
+    //gtk_stack_set_transition_type(GTK_STACK(chat_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
     gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(chat_sidebar), GTK_STACK(chat_stack));
+    g_signal_connect(G_OBJECT(main_window), "button-release-event", G_CALLBACK(on_button_press), NULL);
 
     GtkWidget *chat_separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
     GtkWidget *chat_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -212,6 +243,8 @@ void main_menu()
     gtk_box_pack_start(GTK_BOX(chat_hbox), chat_vbox, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(chat_hbox), chat_separator, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(chat_hbox), chat_stack, TRUE, TRUE, 0);
+
+    g_signal_connect_after(G_OBJECT(main_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
     context = g_main_context_default();
 

@@ -15,14 +15,16 @@ int main(int argc, char *argv[])
     char *msg = malloc(500);
     int sock;
 
-    struct sockaddr_in ServerIp;
+    struct sockaddr_in *ServerIp = malloc(sizeof(struct sockaddr_in));
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    ServerIp.sin_family = AF_INET;
-    ServerIp.sin_port = htons(port);
-    ServerIp.sin_addr.s_addr = inet_addr("127.0.0.1");
+    ServerIp->sin_family = AF_INET;
+    ServerIp->sin_port = htons(port);
+    ServerIp->sin_addr.s_addr = inet_addr("127.0.0.1");
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(sock, (struct sockaddr *)&ServerIp, sizeof(ServerIp)) == -1)
+
+    get_struct_socaddr(&ServerIp, 1);
+    if (connect(sock, (struct sockaddr *)ServerIp, sizeof(*ServerIp)) == -1)
     {
         fprintf(stderr, "Connection failure\n");
         return 0;
