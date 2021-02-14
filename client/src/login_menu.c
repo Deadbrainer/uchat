@@ -3,7 +3,7 @@
 void main_menu_test()
 {
     main_menu();
-    gtk_widget_destroy(welcome_window);
+    gtk_widget_destroy(window);
 }
 
 void login_menu()
@@ -25,20 +25,19 @@ void login_menu()
     GtkWidget *reg_vbox;
 
     // Window creation
-    welcome_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(welcome_window), "UCHAT");
-    gtk_window_set_position(GTK_WINDOW(welcome_window), GTK_WIN_POS_CENTER);
-    gtk_window_set_default_size(GTK_WINDOW(welcome_window), 200, 200);
-    gtk_container_set_border_width(GTK_CONTAINER(welcome_window), 10);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "UCHAT");
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 
-    g_signal_connect(G_OBJECT(welcome_window), "delete-event", G_CALLBACK(closeApp), NULL);
+    g_signal_connect(G_OBJECT(window), "delete-event", G_CALLBACK(closeApp), NULL);
 
     //text befory entry fields
     log_username_label = gtk_label_new("Login: ");
     log_password_label = gtk_label_new("Password: ");
     log_error_label = gtk_label_new(NULL);
-    get_error_label(&log_error_label, 1);
-    //gtk_label_set_markup(GTK_LABEL(log_error_label), "<span foreground='#ff0000'>error</span>");
+    //get_error_label(&log_error_label, 1);
     gtk_label_set_width_chars(GTK_LABEL(log_username_label), 12);
     gtk_label_set_width_chars(GTK_LABEL(log_password_label), 12);
     gtk_label_set_width_chars(GTK_LABEL(log_error_label), 12);
@@ -77,7 +76,7 @@ void login_menu()
     reg_password_label = gtk_label_new("Password: ");
     reg_password_label_repeat = gtk_label_new("Repeat: ");
     reg_error_label = gtk_label_new(NULL);
-    get_error_label(&reg_error_label, 1);
+    //get_error_label(&reg_error_label, 1);
     gtk_label_set_width_chars(GTK_LABEL(reg_username_label), 12);
     gtk_label_set_width_chars(GTK_LABEL(reg_password_label), 12);
     gtk_label_set_width_chars(GTK_LABEL(reg_password_label_repeat), 12);
@@ -134,7 +133,7 @@ void login_menu()
     gtk_box_pack_start(GTK_BOX(box), stack, TRUE, TRUE, 6);
 
     // End
-    gtk_container_add(GTK_CONTAINER(welcome_window), box);
+    gtk_container_add(GTK_CONTAINER(window), box);
 
-    gtk_widget_show_all(welcome_window);
+    gtk_widget_show_all(window);
 }

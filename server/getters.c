@@ -55,3 +55,16 @@ void get_list(t_list **x, int check)
         *x = n;
     }
 }
+
+char *get_date()
+{
+    time_t rawtime;
+    struct tm *timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    char *res = mx_itoa(timeinfo->tm_hour);
+    res = mx_strjoin(res, ":");
+    res = mx_strjoin(res, mx_itoa(timeinfo->tm_min));
+    return res;
+}

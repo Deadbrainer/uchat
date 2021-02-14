@@ -9,23 +9,14 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include "../../libmx/inc/libmx.h"
+#include <signal.h>
 
-GtkWidget *welcome_window;
-GtkWidget *main_window;
 GtkWidget *log_error_label;
 GtkWidget *reg_error_label;
-/*
-g_signal_connect(G_OBJECT(log_window), "delete-event", G_CALLBACK(closeApp), NULL);
-
-G_OBJECT(log_window): log_window - в каком окне мы слушаем, 
-G_CALLBACK(closeApp): closeApp - какую функцию мы вызываем. Передать окно? Не, нихуя. 
-Там после него идет NULL только там можно передать gpointer data
-
-текстовая херня - "clicked"/"Delete-event"/"destroy"
-https://developer.gnome.org/gtk3/stable/GtkWidget.html -- Крутим к оглавлению сигналов
-Там есть все сигналы
-*/
-
+GtkWidget *roomname_error_label;
+GtkWidget *add_user_error_label;
+GtkWidget *window;
+GtkWidget *main_window;
 /** Creates new top-level window 
  * @param win which window
  * @param x width in pixels, or -1 to unset the default width
@@ -56,6 +47,14 @@ void closeApp(GtkWidget *window, gpointer data);
 
 void get_sockid(int *sockid, int check);
 
+void init_authorization(void);
+void init_chat(void);
+void popup_add_chat(void);
+void popup_add_user(gpointer data);
+
+//void add_chat(const gchar *title);
+GtkWidget *add_chat(GtkWidget **stack, char *text);
+
 void main_menu();
 
 //Getters
@@ -67,6 +66,8 @@ void get_password(char **password, int check);
 void get_text_entry(GtkWidget **textEntry, bool check);
 void get_buffer(GtkTextBuffer **buffer, bool check);
 void get_iter(GtkTextIter *iter, bool check);
+void get_list(t_list **x, int check);
+char *get_date();
 
 //Registration Handler
 void reg_clicked_username(GtkWidget *button, gpointer data);
@@ -78,3 +79,36 @@ void login_clicked_username(GtkWidget *button, gpointer data);
 void login_clicked_password(GtkWidget *button, gpointer data);
 
 void main_menu_test();
+
+void add_rooms();
+
+// chat
+GtkWidget *chat_stack;
+const gchar *current_roomname;
+
+//*useless shit >
+GtkWidget *chat_text_area;
+GtkWidget *chat_text_scrolled_window;
+GtkWidget *chat_text_vbox;
+GtkWidget *chat_text_send_button, *chat_text_add_button;
+GtkWidget *chat_text_hbox;
+GtkWidget *chat_text_entry;
+
+// popup add_chat
+GtkWidget *add_chat_dialog;
+GtkWidget *add_chat_label;
+GtkWidget *add_chat_entry;
+GtkWidget *add_chat_content_area;
+
+// popup add_user
+GtkWidget *add_user_dialog;
+GtkWidget *add_user_label;
+GtkWidget *add_user_entry;
+GtkWidget *add_user_content_area;
+
+//GtkWidget *stack;
+GtkWidget *textAction(GtkWidget **stack, char *text);
+// void handle(int signum);
+gboolean handle(gpointer user_data);
+
+pid_t pid;

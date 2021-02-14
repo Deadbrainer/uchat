@@ -26,8 +26,11 @@ void *recvmg(void *client_sock)
     int len;
     char *send_msg = malloc(500);
     char *name = NULL;
+    char *password_test = NULL;
     char *password = NULL;
     char **cut_str = NULL;
+    char **splited_msg = NULL;
+    bool check_r = false;
 
     static pthread_mutex_t mutex_GLOBAL;
     get_mutex(&mutex_GLOBAL, 0);
@@ -70,7 +73,8 @@ void *recvmg(void *client_sock)
             send_back[2] = '\0';
 
             //! PROCESSING LOGIN
-
+            name = mx_strdup(cut_str[1]);
+            password = mx_strdup(cut_str[2]);
             users = get_usernames_from_db(db);
             int error = 0;
             for (t_list *a = users; a != NULL; a = a->next)
@@ -83,10 +87,6 @@ void *recvmg(void *client_sock)
                     {
                         count_to_2 = -1;
                     }
-                    else
-                    {
-                        name = mx_strdup(cut_str[1]);
-                    }
                     error = 1;
                     break;
                 }
@@ -95,24 +95,29 @@ void *recvmg(void *client_sock)
             {
 
                 send_back[0] = 'N';
+
                 if (check_signin == 1)
                 {
                     count_to_2 = -1;
                 }
+                else if (check_signin == 0)
+                {
+                    check_r = true;
+                }
             }
-
-            password = get_password_from_db(db, name);
-
-            if (strcmp(cut_str[2], password) == 0)
+            password_test = get_password_from_db(db, name);
+            if (password_test && (strcmp(cut_str[2], password_test) == 0))
             {
-
                 send_back[1] = 'Y';
             }
             else
             {
-
                 send_back[1] = 'N';
-                count_to_2 = -1;
+
+                if (check_signin == 1)
+                {
+                    count_to_2 = -1;
+                }
             }
 
             //! SENDING ANSWER
@@ -121,62 +126,126 @@ void *recvmg(void *client_sock)
             {
                 fprintf(stderr, "sending failure\n");
             }
-            mx_del_strarr(&cut_str);
-            if ((check_signin == 1 && mx_strcmp("YY", send_back) == 0) || (check_signin == 0 && mx_strcmp("NN", send_back) == 0))
+
+            if ((check_signin == 1 && mx_strcmp("YY", send_back) == 0))
             {
+                get_from_db_users(db);
+                get_rooms_from_db(db);
+                add_sockid_into_user(db, name, sock);
                 char *roomname = NULL;
-                char **id_rooms = get_idrooms_from_users(db);
-                if (*id_rooms != NULL)
+                char **id_rooms = mx_strsplit(get_idrooms_from_users(db, name), '\v');
+                while (*id_rooms != NULL)
                 {
-                    while (id_rooms)
+                    if (mx_strcmp(*id_rooms, "0"))
                     {
                         roomname = get_roomnames_from_rooms(db, *id_rooms);
-                        roomname = mx_strjoin(roomname, " ");
+                        roomname = mx_strjoin("\r\v", roomname);
+                        roomname = mx_strjoin(roomname, "\t"); // splitim po \t
                         roomname = mx_strjoin(roomname, *id_rooms);
                         send(sock, roomname, mx_strlen(roomname), 0);
-                        id_rooms++;
                     }
+                    id_rooms++;
                 }
             }
+            if (check_signin == 0 && check_r == true)
+            {
+                insert_into_db_users(db, name, password, sock);
+            }
+            send(sock, mx_strjoin("\r\r\r\r\v", name), mx_strlen(mx_strjoin("\r\r\r\r\v", name)), 0);
+            mx_del_strarr(&cut_str);
+            count_to_2++;
             break;
         default:
 
-            if (check_signin == 0)
-            {
-                get_password(&password, 0);
-                insert_into_db_users(db, name, password);
-            }
+            splited_msg = mx_strsplit(msg, '\v');
 
             if (msg[0] == '\r' && msg[1] != '\r') // create room spliting using \v
             {
-                char **create_room = mx_strsplit(msg, '\v');
-                insert_into_db_room(db, create_room[1], name);
-                if (msg[1] == '\r' && msg[2] != '\r') // add user to the room (1 = Username, 2 = roomid)
+                if (get_roomnames_from_rooms_by_roomname(db, splited_msg[1]) == NULL)
                 {
-                    char **add_user = mx_strsplit(msg, '\v');
-                    add_idroom_into_user(db, add_user[1], add_user[2]);
-                    add_user_into_room(db, add_user[1], add_user[2]);
-                    send(sock, roomname, mx_strlen(roomname), 0);
-                    if (msg[2] == '\r') // get messages from room
-                    {
-                    }
+                    insert_into_db_room(db, splited_msg[1], name);
+                    int id_created = get_roomid_from_room_with_roomname(db, splited_msg[1]);
+                    add_idroom_into_user(db, name, id_created);
+                    send(sock, "Y", mx_strlen("Y"), 0); // Y roomname does not exist
+                }
+                else
+                {
+                    send(sock, "N", mx_strlen("N"), 0); // N roomname existed
                 }
             }
+            else if (msg[1] == '\r' && msg[2] != '\r') // add user to the room (1 = Username, 2 = roomname)
+            {
+                bool check_add = false;
+                if (get_roomnames_from_rooms_by_roomname(db, splited_msg[2]) == NULL)
+                {
+                    send(sock, "N", mx_strlen("N"), 0); // NN netu rooma
+                    break;
+                }
+                for (t_list *a = users; a != NULL; a = a->next)
+                {
 
-            //if()
-
-            //insert_into_db_message(db, name, msg);
-            //get_from_db_messages(db);
-            strcpy(send_msg, name);
-            strcat(send_msg, ":  ");
-            strcat(send_msg, msg);
-            send_everyone(send_msg, sock, &mutex_GLOBAL, &ids);
-
-            memset(msg, strlen(msg), '\0'); //! NEW
+                    if (mx_strcmp(splited_msg[1], a->data) == 0)
+                    {
+                        bool check_id_if_exist = false;
+                        char **idrooms = mx_strsplit(get_idrooms_from_users(db, splited_msg[1]), '\v');
+                        while (*idrooms != NULL)
+                        {
+                            if (mx_strcmp(mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[2])), *idrooms) == 0)
+                            {
+                                send(sock, "NN", mx_strlen("NN"), 0); // 2 NN etot user uzhe priglashon
+                                check_id_if_exist = true;
+                                break;
+                            }
+                            idrooms++;
+                        }
+                        if (check_id_if_exist == false)
+                        {
+                            add_idroom_into_user(db, splited_msg[1], get_roomid_from_room_with_roomname(db, splited_msg[2]));
+                            add_user_into_room(db, splited_msg[1], mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[2])));
+                            send(get_sockid_from_db(db, splited_msg[1]), mx_strjoin("\r\r\v", splited_msg[2]), mx_strlen(mx_strjoin("\r\r\v", splited_msg[2])), 0); // Send to user who has been added
+                            check_add = true;
+                            break;
+                        }
+                    }
+                }
+                if (check_add == false)
+                {
+                    send(sock, "NNN", mx_strlen("NNN"), 0); // 1 N = netu takovo usera
+                }
+                else
+                {
+                    send(sock, "Y", mx_strlen("Y"), 0); // Y vse okey priglos poshel
+                }
+            }
+            else if (msg[2] == '\r') // get messages from room (1 = room_name, 2 = text)
+            {
+                insert_into_db_message(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])), name, splited_msg[2]);
+                char *date = get_date_from_message(db, splited_msg[2]);
+                char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
+                char **splited_users = mx_strsplit(send_users, '\v');
+                while (*splited_users != NULL)
+                {
+                    send_msg = mx_strjoin("\r\r\r\v", splited_msg[1]);
+                    send_msg = mx_strjoin(send_msg, "\v");
+                    send_msg = mx_strjoin(send_msg, name);
+                    send_msg = mx_strjoin(send_msg, ":  ");
+                    send_msg = mx_strjoin(send_msg, splited_msg[2]);
+                    send_msg = mx_strjoin(send_msg, " ");
+                    send_msg = mx_strjoin(send_msg, date);
+                    if (sock != get_sockid_from_db(db, *splited_users))
+                    {
+                        send(get_sockid_from_db(db, *splited_users), send_msg, mx_strlen(send_msg), 0);
+                    }
+                    splited_users++;
+                }
+            }
+            get_from_db_users(db);
+            get_rooms_from_db(db);
+            get_from_db_messages(db);
+            bzero(msg, mx_strlen(msg)); //! NEW
         }
-        count_to_2++;
     }
-
+    add_sockid_into_user(db, name, 0);
     return NULL; // to silence warning
 } // should not return anything
 
@@ -243,5 +312,6 @@ int main(int argc, char *argv[])
         pthread_create(&recvt, NULL, (void *)recvmg, &Client_sock);
         pthread_mutex_unlock(&mutex_GLOBAL);
     }
+
     return 0;
 }

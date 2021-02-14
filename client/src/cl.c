@@ -36,8 +36,12 @@ int main(int argc, char *argv[])
     get_sockid(&sock, 1);
 
     login_menu();
-    gtk_main();
 
+    // pid = getpid();
+
+    // signal(SIGUSR1, handle);
+
+    gtk_main();
     close(sock);
     return 0;
 }

@@ -31,7 +31,8 @@ void create_table_users(sqlite3 *db, char *zErrMsg, int rc, char *sql)
     sql = "CREATE TABLE IF NOT EXISTS USERS("
           "NAME           TEXT    NOT NULL,"
           "PASSWORD       TEXT    NOT NULL,"
-          "ID_ROOMS       TEXT    NULL);";
+          "SOCK_ID        INT     NOT NULL,"
+          "ID_ROOMS       TEXT    NOT NULL);";
 
     /* Execute SQL statement */
     rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
@@ -74,9 +75,9 @@ void create_table_rooms(sqlite3 *db, char *zErrMsg, int rc, char *sql)
 {
     /* Create SQL statement */
     sql = "CREATE TABLE IF NOT EXISTS ROOMS("
-          "ID            INT PRIMARY KEY      NOT NULL,"
-          "USERNAMES     TEXT    NOT NULL,"
-          "NAME          TEXT    NOT NULL);";
+          "ID            INTEGER     PRIMARY KEY,"
+          "USERNAMES     TEXT        NOT NULL,"
+          "NAME          TEXT        NOT NULL);";
 
     /* Execute SQL statement */
     rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);

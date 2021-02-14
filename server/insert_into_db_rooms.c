@@ -11,15 +11,13 @@ void insert_into_db_room(sqlite3 *db, char *room_name, char *username)
         exit(-1);
     }
 
-    rv = sqlite3_prepare_v2(db, "insert into ROOMS values(?, ?);", -1, &stmt, NULL);
+    rv = sqlite3_prepare_v2(db, "insert into ROOMS values(?, ?, ?);", -1, &stmt, NULL);
     if (rv != SQLITE_OK)
     {
         mx_printstr("Prepare error in ROOMS\n");
     }
-
-    sqlite3_bind_text(stmt, 2, room_name, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, username, -1, SQLITE_STATIC);
-    // sqlite3_bind_int64(stmt, 5, user->date);
+    sqlite3_bind_text(stmt, 2, username, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, room_name, -1, SQLITE_STATIC);
 
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);

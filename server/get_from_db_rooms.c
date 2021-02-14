@@ -1,6 +1,6 @@
 #include "server.h"
 
-void *get_rooms_from_db(sqlite3 *db)
+void get_rooms_from_db(sqlite3 *db)
 {
     char *zErrMsg = 0;
     int rc;
