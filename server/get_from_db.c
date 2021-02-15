@@ -315,10 +315,10 @@ char *get_date_from_message(sqlite3 *db, char *text)
     return date;
 }
 
-char **get_text_from_message(sqlite3 *db, int id)
+t_list *get_text_from_message(sqlite3 *db, int id)
 {
     sqlite3_stmt *restt;
-    char **text = NULL;
+    t_list *text = NULL;
     int rc = sqlite3_open("uchat.db", &db);
 
     if (rc != SQLITE_OK)
@@ -340,10 +340,8 @@ char **get_text_from_message(sqlite3 *db, int id)
     }
     while (sqlite3_step(restt) == SQLITE_ROW)
     {
-        *text = mx_strnew(mx_strlen((char *)sqlite3_column_text(restt, 0)));
-        printf("%s\n", (char *)sqlite3_column_text(restt, 0));
-        *text = mx_strdup((char *)sqlite3_column_text(restt, 0));
-        text++;
+        char *text_msg = mx_strdup((char *)sqlite3_column_text(restt, 0));
+        mx_push_back(&text, text_msg);
     }
 
     sqlite3_finalize(restt);

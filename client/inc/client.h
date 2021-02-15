@@ -18,6 +18,9 @@ GtkWidget *add_user_error_label;
 GtkWidget *window;
 GtkWidget *main_window;
 
+GtkStyleContext *style_context;
+GtkStyleProvider *provider;
+
 void apply_css(GtkWidget *widget, GtkStyleProvider *provider);
 /** Creates new top-level window 
  * @param win which window
@@ -84,7 +87,7 @@ void main_menu_test();
 
 void add_rooms();
 
-void try_reconnect();
+void *recvmg_new(void *my_sock);
 
 // chat
 GtkWidget *chat_stack;

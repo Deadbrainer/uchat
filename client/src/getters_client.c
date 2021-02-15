@@ -136,7 +136,8 @@ char *get_date()
     return res;
 }
 
-void get_struct_socaddr(struct sockaddr_in **SocketIp, int check) {
+void get_struct_socaddr(struct sockaddr_in **SocketIp, int check)
+{
     static struct sockaddr_in *n;
     if (check)
     {

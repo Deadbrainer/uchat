@@ -39,8 +39,7 @@ int get_sockid_from_db(sqlite3 *db, char *name);
 char *get_roomnames_from_rooms_by_roomname(sqlite3 *db, char *roomname);
 int get_roomid_from_room_with_roomname(sqlite3 *db, char *name);
 char *get_date_from_message(sqlite3 *db, char *name);
-char **get_text_from_message(sqlite3 *db, int id);
-
+t_list *get_text_from_message(sqlite3 *db, int id);
 //Getters
 void getDataBase(sqlite3 *x, int check);
 void get_password(char **password, int check);
