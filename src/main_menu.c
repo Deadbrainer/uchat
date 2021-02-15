@@ -117,7 +117,7 @@ void main_menu()
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(hbox), sidebar, false, false, 5);
 
-    main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     new_window(main_window, 1000, 800, TRUE, 10, "uchat");
     gtk_widget_add_events(main_window, GDK_KEY_PRESS_MASK); //* key scanning
 

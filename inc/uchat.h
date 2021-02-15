@@ -8,7 +8,6 @@
 
 GtkWidget *log_window;
 GtkWidget *reg_window;
-GtkWidget *main_window;
 GtkWidget *addUserWindow;
 
 struct all_windows
@@ -57,3 +56,4 @@ void reg_menu();
 void closeApp(GtkWidget *window, gpointer data);
 
 void main_menu();
+void open_main_menu();

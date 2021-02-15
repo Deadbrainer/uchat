@@ -17,10 +17,11 @@ void window_switch(GtkWidget *window, gpointer data)
         reg_menu();
         gtk_widget_destroy(log_window);
     }
-    else if(data == main_window)
-    {
-        main_menu();
-        gtk_widget_destroy(log_window);
-    }
     else gtk_main_quit();
+}
+
+void open_main_menu()
+{
+    main_menu();
+    gtk_widget_destroy(log_window);
 }
