@@ -1,20 +1,34 @@
 #include "../inc/uchat.h"
 
-GdkEvent *k_event;
+GtkWidget *g_stack;
 
-int on_button_press(GtkWidget *textview, GdkEventButton *b_event, gpointer *data)
+int on_button_press(GtkWidget *textview, GdkEventButton *event, gpointer *data)
 {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
-    GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
-    GtkTextIter *iter;
-
-    k_event = gdk_event_new(GDK_BUTTON_SECONDARY);
-    gtk_widget_add_events(textview, GDK_BUTTON_SECONDARY);
-
-    if(gtk_text_tag_event(tag, G_OBJECT(textview), k_event, iter))
+    if(event->type == GDK_2BUTTON_PRESS)
     {
-        printf("Fuck You");
+        GtkTextIter liter;
+        GtkTextIter riter;
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+        GtkTextMark *cursor = gtk_text_buffer_get_mark(buffer, "insert");
+        gtk_text_buffer_get_iter_at_mark(buffer, &liter, cursor);
+        gtk_text_buffer_get_iter_at_mark(buffer, &riter, cursor);
+        gtk_text_iter_backward_line(&liter);
+        gtk_text_iter_forward_line(&liter);
+        gtk_text_iter_forward_line(&riter);
+        gtk_text_iter_backward_char(&riter);
+
+        gchar *text = gtk_text_buffer_get_text(buffer, &liter, &riter, false);
+        gtk_text_buffer_insert(buffer, &riter, "Test for replacement", strlen("Test for replacement"));
+
+        gtk_text_buffer_get_iter_at_mark(buffer, &liter, cursor);
+        gtk_text_buffer_get_iter_at_mark(buffer, &riter, cursor);
+        gtk_text_iter_backward_line(&liter);
+        gtk_text_iter_forward_line(&liter);
+        gtk_text_iter_forward_line(&riter);
+        gtk_text_iter_backward_char(&riter);
+        gtk_text_iter_backward_chars(&riter, strlen("Test for replacement"));
+
+        gtk_text_buffer_delete(buffer, &liter, &riter);
     }
     return false;
 }
@@ -26,7 +40,9 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
     GtkTextMark *cursor;
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
     GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(buffer);
-    GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, "edit");
+    GtkTextTag *font_scale = gtk_text_tag_table_lookup(tag_table, "font_size");
+    GtkTextTag *left_margin = gtk_text_tag_table_lookup(tag_table, "l_margin");
+
 
     if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
     {
@@ -36,15 +52,9 @@ int on_key_press(GtkWidget *widget, GdkEventKey *event, GtkTextView *textview)
         gtk_text_iter_forward_to_end(&iter);
         gtk_text_buffer_place_cursor(buffer, &iter);
 
-        gtk_text_buffer_insert_with_tags(buffer, &iter, text, -1, tag, NULL);
-        gtk_text_buffer_insert(buffer, &iter, "\n\n", -1);
+        gtk_text_buffer_insert_with_tags(buffer, &iter, text, -1, font_scale, left_margin, NULL);
+        gtk_text_buffer_insert_with_tags(buffer, &iter, "\n", -1, NULL, NULL);
         gtk_entry_set_text(GTK_ENTRY(widget), "");
-
-        k_event = gdk_event_new(GDK_KEY_PRESS);
-        if(gtk_text_tag_event(tag, G_OBJECT(textview), k_event, &iter))
-        {
-            printf("Fuck You");
-        }
     }
     return false;
 }
@@ -67,13 +77,14 @@ GtkWidget *textAction(GtkWidget **stack, char *text)
     GtkWidget *textArea = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textArea), false);
     gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textArea), true);
-    gtk_widget_add_events(textArea, GDK_BUTTON_PRESS_MASK);
+    gtk_widget_add_events(textArea, GDK_2BUTTON_PRESS);
     g_signal_connect(G_OBJECT(textArea), "button-press-event", G_CALLBACK(on_button_press), NULL);
 
     GtkTextBuffer *buffer;
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
 
-    GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "edit", "editable", false, NULL);
+    GtkTextTag *tag = gtk_text_buffer_create_tag(buffer, "font_size", "pixels_above_lines", 10, NULL);
+    GtkTextTag *tag1 = gtk_text_buffer_create_tag(buffer, "l_margin", "left_margin", 5, NULL);
 
     GtkWidget *scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(scrolledwindow), textArea);
@@ -112,14 +123,14 @@ void main_menu()
 
     g_signal_connect(G_OBJECT(main_window), "delete-event", G_CALLBACK(closeApp), NULL);
 
-    GtkWidget *stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);//The effect of switching is upward
-	gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(stack));
+    g_stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(g_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);//The effect of switching is upward
+	gtk_stack_sidebar_set_stack(GTK_STACK_SIDEBAR(sidebar), GTK_STACK(g_stack));
     gtk_box_pack_start(GTK_BOX(hbox), gtk_separator_new(GTK_ORIENTATION_VERTICAL), FALSE, FALSE, 0);     
 
-    stack = textAction(&stack, "Games");      
-    stack = textAction(&stack, "Job");                     
-	gtk_box_pack_start(GTK_BOX(hbox), stack, TRUE, TRUE, 0);
+    g_stack = textAction(&g_stack, "Games");      
+    g_stack = textAction(&g_stack, "Job");                     
+	gtk_box_pack_start(GTK_BOX(hbox), g_stack, TRUE, TRUE, 0);
 
     gtk_container_add(GTK_CONTAINER(main_window), hbox);
     gtk_widget_show_all(main_window);
