@@ -1,3 +1,12 @@
-compile:
-	gcc -Wall -g3 -fsanitize=address -pthread server/*.c -lsqlite3 libmx/libmx.a  -o ser
-	gcc -Wall -g3 -fsanitize=address -pthread client/src/*.c libmx/libmx.a -o cl `pkg-config --cflags --libs gtk+-3.0`
+all:
+	@make -C client
+	@make -C server
+uninstall:
+	@make uninstall -C client
+	@make uninstall -C server
+clean:
+	@make clean -C client
+	@make clean -C server
+reinstall: uninstall all
+
+

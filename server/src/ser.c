@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../inc/server.h"
 
 void *recvmg(void *client_sock)
 { // that func can only accept void* argument
@@ -124,8 +124,6 @@ void *recvmg(void *client_sock)
 
                 if ((check_signin == 1 && mx_strcmp("YY", send_back) == 0))
                 {
-                    get_from_db_users(db);
-                    get_rooms_from_db(db);
                     add_sockid_into_user(db, name, sock);
                     char *roomname = NULL;
                     char **id_rooms = mx_strsplit(get_idrooms_from_users(db, name), '\v');
@@ -141,7 +139,6 @@ void *recvmg(void *client_sock)
                         }
                         id_rooms++;
                     }
-                    
                 }
                 if (check_signin == 0 && check_r == true)
                 {
@@ -216,24 +213,33 @@ void *recvmg(void *client_sock)
             else if (msg[2] == '\r' && msg[3] != '\r') // get messages from room (1 = room_name, 2 = text)
             {
                 insert_into_db_message(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])), name, splited_msg[2]);
+                t_list *id_message = get_idmessage_from_message(db, get_roomid_from_room_with_roomname(db, splited_msg[1]));
                 char *date = get_date_from_message(db, splited_msg[2]);
                 char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
                 char **splited_users = mx_strsplit(send_users, '\v');
+                char *id_msg;
+                for (t_list *a = id_message; a != NULL; a = a->next)
+                {
+                    id_msg = a->data;
+                }
+                send_msg = mx_strjoin("\r\r\r\v", splited_msg[1]);
+                send_msg = mx_strjoin(send_msg, "\v");
+                send_msg = mx_strjoin(send_msg, name);
+                send_msg = mx_strjoin(send_msg, ":  \t");
+                send_msg = mx_strjoin(send_msg, splited_msg[2]);
+                send_msg = mx_strjoin(send_msg, " \t");
+                send_msg = mx_strjoin(send_msg, date);
+                send_msg = mx_strjoin(send_msg, "\t");
+                send_msg = mx_strjoin(send_msg, id_msg);
                 while (*splited_users != NULL)
                 {
-                    send_msg = mx_strjoin("\r\r\r\v", splited_msg[1]);
-                    send_msg = mx_strjoin(send_msg, "\v");
-                    send_msg = mx_strjoin(send_msg, name);
-                    send_msg = mx_strjoin(send_msg, ":  ");
-                    send_msg = mx_strjoin(send_msg, splited_msg[2]);
-                    send_msg = mx_strjoin(send_msg, " ");
-                    send_msg = mx_strjoin(send_msg, date);
                     if (sock != get_sockid_from_db(db, *splited_users))
                     {
                         send(get_sockid_from_db(db, *splited_users), send_msg, mx_strlen(send_msg), 0);
                     }
                     splited_users++;
                 }
+                send(sock, send_msg, mx_strlen(send_msg), 0);
             }
             else if (msg[3] == '\r' && msg[4] != '\r')
             {
@@ -241,25 +247,26 @@ void *recvmg(void *client_sock)
             }
             else if (msg[4] == '\r' && msg[5] != '\r') // show message 1 = room_name
             {
-                printf("%s\n", splited_msg[1]);
                 if (splited_msg[1] != NULL)
                 {
+                    t_list *id_message = get_idmessage_from_message(db, get_roomid_from_room_with_roomname(db, splited_msg[1]));
                     t_list *message_text = get_text_from_message(db, get_roomid_from_room_with_roomname(db, splited_msg[1]));
                     char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
                     char **splited_users = mx_strsplit(send_users, '\v');
                     while (*splited_users != NULL)
                     {
-                        for (t_list *a = message_text; a != NULL; a = a->next)
+                        for (t_list *a = message_text, *b = id_message; a != NULL; a = a->next, b = b->next)
                         {
                             char *date = get_date_from_message(db, a->data);
                             send_msg = mx_strjoin("\r\r\r\r\v", splited_msg[1]);
                             send_msg = mx_strjoin(send_msg, "\v");
                             send_msg = mx_strjoin(send_msg, name);
-                            send_msg = mx_strjoin(send_msg, ":  ");
+                            send_msg = mx_strjoin(send_msg, ":  \t");
                             send_msg = mx_strjoin(send_msg, a->data);
-                            send_msg = mx_strjoin(send_msg, " ");
+                            send_msg = mx_strjoin(send_msg, " \t");
                             send_msg = mx_strjoin(send_msg, date);
-                            printf("%s from serv\n", send_msg);
+                            send_msg = mx_strjoin(send_msg, "\t");
+                            send_msg = mx_strjoin(send_msg, b->data);
                             send(get_sockid_from_db(db, *splited_users), send_msg, mx_strlen(send_msg), 0);
                             usleep(500);
                         }
@@ -267,9 +274,20 @@ void *recvmg(void *client_sock)
                     }
                 }
             }
+            else if (msg[5] == '\r' && msg[6] != '\r') // 1 - id_mesage, 2 - new_text
+            {
+                add_newtet_into_mesage(db, splited_msg[2], splited_msg[1]);
+                char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
+                char **splited_users = mx_strsplit(send_users, '\v');
+                while (*splited_users != NULL)
+                {
+                    if (sock != get_sockid_from_db(db, *splited_users))
+                    {
+                        send(get_sockid_from_db(db, *splited_users), mx_strjoin("\r\r\r\r\r\v", splited_msg[1]), mx_strlen(mx_strjoin("\r\r\r\r\r\v", splited_msg[1])), 0);
+                    }
+                }
+            }
 
-            //get_from_db_users(db);
-            //get_rooms_from_db(db);
             bzero(msg, mx_strlen(msg)); //! NEW
         }
     }
@@ -286,6 +304,16 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    pid_t pit;
+    if ((pit = fork()) < 0)
+    {
+        exit(1);
+    }
+    else if (pit != 0)
+    {
+        exit(0);
+    }
+    setsid();
     int port = mx_atoi(argv[1]);
 
     static pthread_mutex_t mutex_GLOBAL;
@@ -319,7 +347,6 @@ int main(int argc, char *argv[])
 
     static sqlite3 *db; // CREATE DATABASE
     create_table(db);
-    //get_from_db_users(db);
 
     t_list *ids = NULL;
 

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include "../libmx/inc/libmx.h"
+#include "../../libmx/inc/libmx.h"
 #include <sqlite3.h>
 #include <stdbool.h>
 
@@ -24,6 +24,7 @@ void insert_into_db_room(sqlite3 *db, char *room_name, char *username);
 void add_idroom_into_user(sqlite3 *db, char *username, int id);
 void add_user_into_room(sqlite3 *db, char *username, char *id);
 void add_sockid_into_user(sqlite3 *db, char *username, int sockid);
+void add_newtet_into_mesage(sqlite3 *db, char *new_text, char *id);
 
 // Get from db
 void get_from_db_messages(sqlite3 *db);
@@ -40,6 +41,8 @@ char *get_roomnames_from_rooms_by_roomname(sqlite3 *db, char *roomname);
 int get_roomid_from_room_with_roomname(sqlite3 *db, char *name);
 char *get_date_from_message(sqlite3 *db, char *name);
 t_list *get_text_from_message(sqlite3 *db, int id);
+t_list *get_idmessage_from_message(sqlite3 *db, int id);
+
 //Getters
 void getDataBase(sqlite3 *x, int check);
 void get_password(char **password, int check);

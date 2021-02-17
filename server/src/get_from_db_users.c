@@ -1,6 +1,6 @@
-#include "server.h"
+#include "../inc/server.h"
 
-void get_from_db_messages(sqlite3 *db)
+void get_from_db_users(sqlite3 *db)
 {
     char *zErrMsg = 0;
     int rc;
@@ -20,7 +20,7 @@ void get_from_db_messages(sqlite3 *db)
     }
 
     /* Create SQL statement */
-    sql = "SELECT * from MESSAGES";
+    sql = "SELECT * from USERS";
 
     /* Execute SQL statement */
     rc = sqlite3_exec(db, sql, callback, (void *)data, &zErrMsg);

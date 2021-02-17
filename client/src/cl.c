@@ -3,14 +3,21 @@
 int main(int argc, char *argv[])
 {
     gtk_init(&argc, &argv);
+    int port;
 
-    if (argc != 2)
+    if (argc != 3)
     {
         fprintf(stderr, "Wrong usage\n");
         return 0;
     }
-
-    int port = mx_atoi(argv[1]);
+    if (mx_atoi(argv[2]) != 0)
+    {
+        port = mx_atoi(argv[2]);
+    }
+    else
+    {
+        printf("Please enter valide port");
+    }
 
     char *msg = malloc(500);
     int sock;
@@ -20,7 +27,7 @@ int main(int argc, char *argv[])
     sock = socket(AF_INET, SOCK_STREAM, 0);
     ServerIp->sin_family = AF_INET;
     ServerIp->sin_port = htons(port);
-    ServerIp->sin_addr.s_addr = inet_addr("127.0.0.1");
+    ServerIp->sin_addr.s_addr = inet_addr(argv[1]);
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     get_struct_socaddr(&ServerIp, 1);
@@ -38,10 +45,6 @@ int main(int argc, char *argv[])
     get_sockid(&sock, 1);
 
     login_menu();
-
-    // pid = getpid();
-
-    // signal(SIGUSR1, handle);
 
     gtk_main();
     close(sock);

@@ -3,7 +3,7 @@
     font-style: normal;
   }
   
-  window {
+  window, dialog {
     all: unset;
     background-color: #2f3136;
   }

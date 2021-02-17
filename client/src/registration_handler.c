@@ -2,6 +2,9 @@
 
 void reg_clicked_username(GtkWidget *button, gpointer data)
 {
+    GtkWidget *a = button;
+    a = NULL;
+
     int sock = 0;
     get_sockid(&sock, 0);
     char *username = NULL;
@@ -12,6 +15,9 @@ void reg_clicked_username(GtkWidget *button, gpointer data)
 
 void reg_clicked_password(GtkWidget *button, gpointer data)
 {
+    GtkWidget *a = button;
+    a = NULL;
+
     int sock = 0;
     get_sockid(&sock, 0);
     char *password = NULL;
@@ -22,6 +28,9 @@ void reg_clicked_password(GtkWidget *button, gpointer data)
 
 void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
 {
+    GtkWidget *a = button;
+    a = NULL;
+
     int sock = 0;
     get_sockid(&sock, 0);
     char *password_repeat = NULL;

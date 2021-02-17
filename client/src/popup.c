@@ -4,19 +4,19 @@ void popup_add_chat()
 {
     GtkWidget *roomname_hbox_error;
     // create components
-    add_chat_dialog = gtk_dialog_new_with_buttons("Create new chat",
-                                                  GTK_WINDOW(main_window),
-                                                  GTK_DIALOG_MODAL,
-                                                  ("Create"),
-                                                  GTK_RESPONSE_OK,
-                                                  ("Cancel"),
-                                                  GTK_RESPONSE_REJECT,
-                                                  NULL);
+    GtkWidget *add_chat_dialog = gtk_dialog_new_with_buttons("Create new chat",
+                                                             GTK_WINDOW(main_window),
+                                                             GTK_DIALOG_MODAL,
+                                                             ("Create"),
+                                                             GTK_RESPONSE_OK,
+                                                             ("Cancel"),
+                                                             GTK_RESPONSE_REJECT,
+                                                             NULL);
 
-    add_chat_label = gtk_label_new("Enter chat name");
-    add_chat_entry = gtk_entry_new();
+    GtkWidget *add_chat_label = gtk_label_new("Enter chat name");
+    GtkWidget *add_chat_entry = gtk_entry_new();
     roomname_error_label = gtk_label_new(NULL);
-    add_chat_content_area = gtk_dialog_get_content_area(GTK_DIALOG(add_chat_dialog));
+    GtkWidget *add_chat_content_area = gtk_dialog_get_content_area(GTK_DIALOG(add_chat_dialog));
 
     // packing
     gtk_label_set_width_chars(GTK_LABEL(roomname_error_label), 10);
@@ -27,7 +27,7 @@ void popup_add_chat()
     gtk_box_pack_start(GTK_BOX(add_chat_content_area), add_chat_label, TRUE, FALSE, 10);
     gtk_box_pack_start(GTK_BOX(roomname_hbox_error), roomname_error_label, TRUE, FALSE, 5);
     gtk_box_pack_end(GTK_BOX(add_chat_content_area), roomname_hbox_error, FALSE, FALSE, 5);
-
+    apply_css(add_chat_dialog, provider);
     // show all
     gtk_widget_show_all(add_chat_content_area);
 
@@ -72,21 +72,24 @@ void popup_add_chat()
 
 void popup_add_user(gpointer data)
 {
+    gpointer a = data;
+    a = NULL;
+
     GtkWidget *add_user_hbox_error;
     // create components
-    add_user_dialog = gtk_dialog_new_with_buttons("Add new user",
-                                                  GTK_WINDOW(main_window),
-                                                  GTK_DIALOG_MODAL,
-                                                  ("Ok"),
-                                                  GTK_RESPONSE_OK,
-                                                  ("Cancel"),
-                                                  GTK_RESPONSE_REJECT,
-                                                  NULL);
+    GtkWidget *add_user_dialog = gtk_dialog_new_with_buttons("Add new user",
+                                                             GTK_WINDOW(main_window),
+                                                             GTK_DIALOG_MODAL,
+                                                             ("Ok"),
+                                                             GTK_RESPONSE_OK,
+                                                             ("Cancel"),
+                                                             GTK_RESPONSE_REJECT,
+                                                             NULL);
 
-    add_user_label = gtk_label_new("Enter nickname");
-    add_user_entry = gtk_entry_new();
+    GtkWidget *add_user_label = gtk_label_new("Enter nickname");
+    GtkWidget *add_user_entry = gtk_entry_new();
     add_user_error_label = gtk_label_new(NULL);
-    add_user_content_area = gtk_dialog_get_content_area(GTK_DIALOG(add_user_dialog));
+    GtkWidget *add_user_content_area = gtk_dialog_get_content_area(GTK_DIALOG(add_user_dialog));
 
     gtk_label_set_width_chars(GTK_LABEL(add_user_error_label), 10);
     add_user_hbox_error = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -98,6 +101,7 @@ void popup_add_user(gpointer data)
     gtk_box_pack_start(GTK_BOX(add_user_hbox_error), add_user_error_label, TRUE, FALSE, 5);
     gtk_box_pack_end(GTK_BOX(add_user_content_area), add_user_hbox_error, FALSE, FALSE, 5);
 
+    apply_css(add_user_dialog, provider);
     // show all
     gtk_widget_show_all(add_user_content_area);
 

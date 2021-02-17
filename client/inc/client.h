@@ -15,13 +15,14 @@ GtkWidget *log_error_label;
 GtkWidget *reg_error_label;
 GtkWidget *roomname_error_label;
 GtkWidget *add_user_error_label;
-GtkWidget *window;
+
 GtkWidget *main_window;
 
 GtkStyleContext *style_context;
 GtkStyleProvider *provider;
 
 void apply_css(GtkWidget *widget, GtkStyleProvider *provider);
+
 /** Creates new top-level window 
  * @param win which window
  * @param x width in pixels, or -1 to unset the default width
@@ -83,7 +84,13 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data);
 void login_clicked_username(GtkWidget *button, gpointer data);
 void login_clicked_password(GtkWidget *button, gpointer data);
 
+// reconect
+void try_reconnect();
+void try_reconnect_login();
+
 void main_menu_test();
+
+void auto_scroll();
 
 void add_rooms();
 
@@ -94,24 +101,6 @@ GtkWidget *chat_stack;
 const gchar *current_roomname;
 
 //*useless shit >
-GtkWidget *chat_text_area;
-GtkWidget *chat_text_scrolled_window;
-GtkWidget *chat_text_vbox;
-GtkWidget *chat_text_send_button, *chat_text_add_button;
-GtkWidget *chat_text_hbox;
-GtkWidget *chat_text_entry;
-
-// popup add_chat
-GtkWidget *add_chat_dialog;
-GtkWidget *add_chat_label;
-GtkWidget *add_chat_entry;
-GtkWidget *add_chat_content_area;
-
-// popup add_user
-GtkWidget *add_user_dialog;
-GtkWidget *add_user_label;
-GtkWidget *add_user_entry;
-GtkWidget *add_user_content_area;
 
 //GtkWidget *stack;
 GtkWidget *textAction(GtkWidget **stack, char *text);

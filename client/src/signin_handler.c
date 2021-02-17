@@ -2,6 +2,9 @@
 
 void login_clicked_username(GtkWidget *button, gpointer data)
 {
+    GtkWidget *a = button;
+    a = NULL;
+
     int sock = 0;
     get_sockid(&sock, 0);
     char *username = NULL;
@@ -11,6 +14,7 @@ void login_clicked_username(GtkWidget *button, gpointer data)
 
 void login_clicked_password(GtkWidget *button, gpointer data)
 {
+    GtkWidget *window = gtk_widget_get_toplevel(button);
     int sock = 0;
     get_sockid(&sock, 0);
     char *password = NULL;
@@ -37,7 +41,7 @@ void login_clicked_password(GtkWidget *button, gpointer data)
 
             if (mx_strcmp(rec, "YY") == 0)
             {
-                main_menu_test();
+                main_menu_test(window);
             }
             else if ((mx_strcmp(rec, "YN") == 0))
             {

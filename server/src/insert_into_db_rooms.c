@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../inc/server.h"
 
 void insert_into_db_room(sqlite3 *db, char *room_name, char *username)
 {

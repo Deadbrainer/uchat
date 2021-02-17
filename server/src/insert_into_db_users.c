@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../inc/server.h"
 
 void insert_into_db_users(sqlite3 *db, char *name, char *password, int sock_id)
 {

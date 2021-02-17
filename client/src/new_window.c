@@ -1,6 +1,8 @@
 #include "../inc/client.h"
 
-void new_window(GtkWidget *win, int x, int z, bool resize, int border, char title[]) {
+void new_window(GtkWidget *win, int x, int z, bool resize, int border, char title[])
+{
+    resize = true;
     gtk_window_set_title(GTK_WINDOW(win), title);
     gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
     gtk_window_set_default_size(GTK_WINDOW(win), x, z);

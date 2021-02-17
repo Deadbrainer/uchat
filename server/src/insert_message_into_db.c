@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../inc/server.h"
 #include <time.h>
 
 void insert_into_db_message(sqlite3 *db, char *room_id, char *name, char *msg)
@@ -12,16 +12,16 @@ void insert_into_db_message(sqlite3 *db, char *room_id, char *name, char *msg)
         exit(-1);
     }
 
-    rv = sqlite3_prepare_v2(db, "insert into MESSAGES values(?, ?, ?, ?);", -1, &stmt, NULL);
+    rv = sqlite3_prepare_v2(db, "insert into MESSAGES values(?, ?, ?, ?, ?);", -1, &stmt, NULL);
     if (rv != SQLITE_OK)
     {
         mx_printstr("Prepare error in MESSAGES\n");
     }
 
-    sqlite3_bind_text(stmt, 1, room_id, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, name, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, get_date(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, msg, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, room_id, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, name, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, get_date(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, msg, -1, SQLITE_STATIC);
 
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);

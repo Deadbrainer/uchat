@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../inc/server.h"
 
 void getDataBase(sqlite3 *x, int check)
 { // to get variables from main
@@ -63,8 +63,6 @@ char *get_date()
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    char *res = mx_itoa(timeinfo->tm_hour);
-    res = mx_strjoin(res, ":");
-    res = mx_strjoin(res, mx_itoa(timeinfo->tm_min));
-    return res;
+    char *res = asctime(timeinfo);
+    return mx_strjoin("\n", res);
 }
