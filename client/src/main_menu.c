@@ -41,34 +41,7 @@ gboolean show_message(gpointer message)
 
 int on_button_press(GtkWidget *widget, GdkEventButton *event)
 {
-    // TODO: Work in progress - edit
-    // if(event->type == GDK_2BUTTON_PRESS)
-    // {
-    //     GtkTextIter liter;
-    //     GtkTextIter riter;
-    //     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    //     GtkTextMark *cursor = gtk_text_buffer_get_mark(buffer, "insert");
-    //     gtk_text_buffer_get_iter_at_mark(buffer, &liter, cursor);
-    //     gtk_text_buffer_get_iter_at_mark(buffer, &riter, cursor);
-    //     gtk_text_iter_backward_line(&liter);
-    //     gtk_text_iter_forward_line(&liter);
-    //     gtk_text_iter_forward_line(&riter);
-    //     gtk_text_iter_backward_char(&riter);
-
-    //     gchar *text = gtk_text_buffer_get_text(buffer, &liter, &riter, false);
-    //     gtk_text_buffer_insert(buffer, &riter, "Test for replacement", strlen("Test for replacement"));
-
-    //     gtk_text_buffer_get_iter_at_mark(buffer, &liter, cursor);
-    //     gtk_text_buffer_get_iter_at_mark(buffer, &riter, cursor);
-    //     gtk_text_iter_backward_line(&liter);
-    //     gtk_text_iter_forward_line(&liter);
-    //     gtk_text_iter_forward_line(&riter);
-    //     gtk_text_iter_backward_char(&riter);
-    //     gtk_text_iter_backward_chars(&riter, strlen("Test for replacement"));
-
-    //     gtk_text_buffer_delete(buffer, &liter, &riter);
-    // }
-    /*else*/ if (current_roomname != gtk_stack_get_visible_child_name(GTK_STACK(chat_stack)))
+    if (current_roomname != gtk_stack_get_visible_child_name(GTK_STACK(chat_stack)))
     {
         GtkWidget *vbox = gtk_stack_get_visible_child(GTK_STACK(chat_stack));
         GList *list1 = gtk_container_get_children(GTK_CONTAINER(vbox));
