@@ -9,7 +9,7 @@ FLAG_SQL = -lsqlite3
 DEBUG_FLAGS = -fsanitize=address -fno-omit-frame-pointer
 all: $(NAME)
 $(NAME): $(OBJ)
-	@$(CC) $(LIBMX) $(FLAGS) $(FLAG_SQL) $(DEBUG_FLAGS) $(OBJ) -o ../$(NAME)
+	@$(CC) $(FLAGS) $(FLAG_SQL) $(DEBUG_FLAGS) $(OBJ) $(LIBMX) -o ../$(NAME)
 	@make clean
 	@printf "\r\33[2K$(NAME):\t\t \033[32;1mcreated\033[0m\n"
 $(OBJ): | obj
@@ -17,9 +17,9 @@ obj:
 	@mkdir $@
 obj/%.o: src/%.c $(INC) $(LIBMX)
 ifeq ($< ,src/db.c)
-	@$(CC) $(LIBMX) $(FLAGS) $(FLAG_SQL) -c $< -o $@
+	@$(CC)  $(FLAGS) $(FLAG_SQL) -c $< -o $@
 else
-	@$(CC) $(LIBMX) $(FLAGS) -c $< -o $@
+	@$(CC)  $(FLAGS) -c $< -o $@
 endif
 	@printf "\r\33[2K$(NAME):\033[33;1m\t\t compile \033[0m$(<:$(SRC_DIR)/%.c=%)\r"
 clean:

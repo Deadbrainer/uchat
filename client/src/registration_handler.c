@@ -81,3 +81,5 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
         gtk_label_set_markup(GTK_LABEL(reg_error_label), "<span foreground='#ff0000'>Enter username and password</span>");
     }
 }
+
+

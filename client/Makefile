@@ -1,24 +1,32 @@
-SRC = src/*.c
+CC = clang
+NAME = uchat
 INC = inc/*.h
-OBJ = obj/*.o
-BINARY = uchat
-FOLDER = obj
+LIBMX = ../libmx/libmx.a
+SRC := $(wildcard src/*.c)
+OBJ := $(addprefix obj/, $(notdir $(SRC:%.c=%.o)))
+OBJ_DIR := obj
+FLAGS = -std=c11 -Wno-error=unused-variable -Wall -Wextra -Werror -Wpedantic
+DEBUG_FLAGS = -fsanitize=address -fno-omit-frame-pointer
+GTK_FLAGS = `pkg-config --cflags gtk+-3.0`
+GTK_LIBS = `pkg-config --libs gtk+-3.0`
 
-all: $(BINARY)
-
-$(BINARY):
-	@mkdir $(FOLDER)
-	@clang -std=c11 -Wall -Wextra -Werror -Wpedantic -c $(SRC) -I $(INC)
-	@mv *.o $(FOLDER)
-	@clang $(OBJ) libmx/$(LIB) -o $(BINARY) `pkg-config --cflags --libs gtk+-3.0`
-
+all: $(NAME)
+$(NAME): $(OBJ)
+	@$(CC)  $(FLAGS) $(GTK_LIBS) $(DEBUG_FLAGS) $(OBJ) $(LIBMX) -o ../$(NAME)
+	@make clean
+	@printf "\r\33[2K$(NAME):\t\t \033[32;1mcreated\033[0m\n"
+$(OBJ): | obj
+obj:
+	@mkdir $@ 
+obj/%.o: src/%.c $(INC) libmx.a
+	@$(CC) $(FLAGS) $(GTK_FLAGS) -c $< -o $@
+	@printf "\r\33[2K$(NAME):\033[33;1m\t\t compile \033[0m$(<:$(SRC_DIR)/%.c=%)\r"
 libmx.a: 
-	make -C libmx
-
-uninstall: clean
-	@rm -rf $(BINARY)
-
+	make -C ../libmx
 clean:
-	@rm -rf $(OBJ)
-
-reinstall: uninstall all
+	@rm -rf obj/*.o
+	@rm -rf ./obj
+	@printf "$(NAME):\t\t \033[31;1mdeleted\033[0m $(OBJ_DIR)\r"
+uninstall:
+	@rm -rf ../$(NAME)
+	@printf "$(NAME):\t\t \033[31;1muninstalled\033[0m\n"

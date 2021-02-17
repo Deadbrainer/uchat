@@ -276,7 +276,7 @@ void *recvmg(void *client_sock)
             }
             else if (msg[5] == '\r' && msg[6] != '\r') // 1 - id_mesage, 2 - new_text
             {
-                add_newtet_into_mesage(db, splited_msg[2], splited_msg[1]);
+                add_newtext_into_mesage(db, splited_msg[2], splited_msg[1]);
                 char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
                 char **splited_users = mx_strsplit(send_users, '\v');
                 while (*splited_users != NULL)
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
         get_list(&ids, 1);
         getDataBase(db, 1); // to give a value
 
-        pthread_create(&recvt, NULL, (void *)recvmg, &Client_sock);
+        pthread_create(&recvt, NULL, recvmg, &Client_sock);
         pthread_mutex_unlock(&mutex_GLOBAL);
     }
 
