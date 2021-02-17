@@ -77,6 +77,7 @@ void login_menu()
     reg_password_entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(reg_password_entry), "Password");
     reg_password_entry_repeat = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(reg_password_entry_repeat), "Password repeat");
     gtk_entry_set_visibility(GTK_ENTRY(reg_password_entry), FALSE);
     gtk_entry_set_visibility(GTK_ENTRY(reg_password_entry_repeat), FALSE);
 

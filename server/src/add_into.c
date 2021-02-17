@@ -21,7 +21,7 @@ void add_user_into_room(sqlite3 *db, char *username, char *id)
 
     if (rv != SQLITE_OK)
     {
-        fprintf(stderr, "Error int searching: %s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "Error in searching: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
 
@@ -52,7 +52,7 @@ void add_idroom_into_user(sqlite3 *db, char *username, int id)
 
     if (rv != SQLITE_OK)
     {
-        fprintf(stderr, "Error int searching: %s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "Error in searching: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
 
@@ -78,7 +78,7 @@ void add_sockid_into_user(sqlite3 *db, char *username, int sockid)
 
     if (rv != SQLITE_OK)
     {
-        mx_printstr("Prepare error in ROOMS\n");
+        fprintf(stderr, "Error in searching: %s\n", sqlite3_errmsg(db));
     }
 
     sqlite3_step(stmt);
@@ -97,13 +97,13 @@ void add_newtext_into_mesage(sqlite3 *db, char *newtext, char *id)
         exit(-1);
     }
 
-    rv = sqlite3_prepare_v2(db, "UPDATE MESSAGES SET TEXT = ? WHERE ID = ?", -1, &stmt, NULL);
+    rv = sqlite3_prepare_v2(db, "UPDATE MESSAGES SET MESSAGE = ? WHERE ID = ?", -1, &stmt, NULL);
     sqlite3_bind_text(stmt, 1, newtext, -1, SQLITE_STATIC);
     sqlite3_bind_int(stmt, 2, mx_atoi(id));
 
     if (rv != SQLITE_OK)
     {
-        mx_printstr("Prepare error in ROOMS\n");
+        fprintf(stderr, "Error in searching: %s\n", sqlite3_errmsg(db));
     }
 
     sqlite3_step(stmt);

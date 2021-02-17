@@ -44,10 +44,6 @@ void try_reconnect_login()
         else
         {
             get_sockid(&sock, 1);
-
-            char *name;
-            get_login(&name, 0);
-            send(sock, mx_strjoin("\r\r\r\r\r\r\v", name), strlen(mx_strjoin("\r\r\r\r\r\r\v", name)), 0);
             break;
         }
     }

@@ -44,6 +44,7 @@ void create_table_messages(sqlite3 *db, char *zErrMsg, int rc, char *sql)
 {
     /* Create SQL statement */
     sql = "CREATE TABLE IF NOT EXISTS MESSAGES("
+          "ID            INTEGER PRIMARY KEY,"
           "ID_ROOM       INT     NOT NULL,"
           "USERNAME      TEXT    NOT NULL,"
           "DATE          TEXT    NOT NULL,"

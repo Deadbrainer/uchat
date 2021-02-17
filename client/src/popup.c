@@ -124,17 +124,14 @@ void popup_add_user(gpointer data)
             recv(sock, rec, 8, 0);
             if (mx_strcmp(rec, "N") == 0)
             {
-                printf("N");
                 gtk_label_set_markup(GTK_LABEL(add_user_error_label), "<span foreground='#ff0000'>Room doesn`t exist</span>");
             }
             else if (mx_strcmp(rec, "NN") == 0)
             {
-                printf("NN");
                 gtk_label_set_markup(GTK_LABEL(add_user_error_label), "<span foreground='#ff0000'>User is already invited</span>");
             }
             else if (mx_strcmp(rec, "NNN") == 0)
             {
-                printf("NNN");
                 gtk_label_set_markup(GTK_LABEL(add_user_error_label), "<span foreground='#ff0000'>Username is wrong</span>");
             }
             mx_strdel(&rec);

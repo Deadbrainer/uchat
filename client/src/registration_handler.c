@@ -28,6 +28,7 @@ void reg_clicked_password(GtkWidget *button, gpointer data)
 
 void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
 {
+    GtkWidget *window = gtk_widget_get_toplevel(button);
     GtkWidget *a = button;
     a = NULL;
 
@@ -50,7 +51,7 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
 
             if (send(sock, username, mx_strlen(username), 0) < 0)
             {
-                fprintf(stderr, "sending failure\n");
+                try_reconnect_login();
             }
 
             int len = 0;
@@ -60,7 +61,7 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
 
             if (mx_strcmp(rec, "NN") == 0)
             {
-                main_menu_test();
+                main_menu_test(window);
             }
             else if ((mx_strcmp(rec, "YN") == 0) || (mx_strcmp(rec, "YY") == 0))
             {
@@ -68,7 +69,7 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
             }
             else
             {
-                printf("Unexpected answer: %s\n", rec);
+                gtk_label_set_markup(GTK_LABEL(reg_error_label), "<span foreground='#ff0000'>Try to recconect</span>");
             }
         }
         else
@@ -81,5 +82,4 @@ void reg_clicked_password_repeat(GtkWidget *button, gpointer data)
         gtk_label_set_markup(GTK_LABEL(reg_error_label), "<span foreground='#ff0000'>Enter username and password</span>");
     }
 }
-
 

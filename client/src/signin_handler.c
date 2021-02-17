@@ -31,7 +31,7 @@ void login_clicked_password(GtkWidget *button, gpointer data)
         {
             if (send(sock, username, mx_strlen(username), 0) < 0)
             {
-                fprintf(stderr, "sending failure\n");
+                try_reconnect_login();
             }
 
             int len = 0;
@@ -53,7 +53,7 @@ void login_clicked_password(GtkWidget *button, gpointer data)
             }
             else
             {
-                printf("Unexpected answer: %s\n", rec);
+                gtk_label_set_markup(GTK_LABEL(reg_error_label), "<span foreground='#ff0000'>Try to recconect</span>");
             }
         }
     }

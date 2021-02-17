@@ -1,145 +1,7 @@
 #include "../inc/client.h"
-GtkWidget *edit_window;
 
 GMainContext *context;
 //GDK_BUTTON_SECONDARY
-int is_esc(GtkWidget *edit_window, GdkEventKey *event)
-{
-    if (event->keyval == GDK_KEY_Escape)
-    {
-        gtk_window_set_modal(GTK_WINDOW(edit_window), false);
-        gtk_widget_destroy(edit_window);
-    }
-    return false;
-}
-
-gboolean local_edit_message()
-{
-
-    return G_SOURCE_REMOVE;
-}
-//
-int ebr(GtkWidget *edit_entry, GdkEventKey *event, gpointer lineid)
-{
-    gint *b_line = (gint *)lineid;
-    gint line = *b_line;
-    printf("%d\n", line);
-    if (event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Return)
-    {
-        GtkWidget *vbox = gtk_stack_get_visible_child(GTK_STACK(chat_stack));
-        GList *list1 = gtk_container_get_children(GTK_CONTAINER(vbox));
-        GtkContainer *scroll = GTK_CONTAINER(list1->next->data);
-        GList *list2 = gtk_container_get_children(GTK_CONTAINER(scroll));
-        GtkWidget *textArea = GTK_WIDGET(list2->data);
-
-        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
-        GtkTextTagTable *table = gtk_text_buffer_get_tag_table(buffer);
-        GtkTextTag *color = gtk_text_tag_table_lookup(table, "color");
-        GtkTextTag *above_below_pixels = gtk_text_tag_table_lookup(table, "above_below_pixels");
-        GtkTextTag *time_spacing = gtk_text_tag_table_lookup(table, "time_spacing");
-
-        GtkTextIter line_iter;
-        GtkTextMark *cursor;
-        cursor = gtk_text_buffer_get_mark(buffer, "insert");
-        gtk_text_buffer_get_iter_at_mark(buffer, &line_iter, cursor);
-        gtk_text_iter_set_line(&line_iter, line);
-        while (gtk_text_iter_starts_tag(&line_iter, above_below_pixels))
-        {
-            gtk_text_iter_forward_char(&line_iter);
-        }
-        gtk_text_iter_forward_char(&line_iter);
-        GtkTextIter *liter = gtk_text_iter_copy(&line_iter);
-        GtkTextIter *riter = gtk_text_iter_copy(&line_iter);
-        while (!gtk_text_iter_ends_tag(riter, above_below_pixels))
-        {
-            gtk_text_iter_forward_char(riter);
-        }
-        gtk_text_buffer_delete(buffer, liter, riter);
-        gtk_text_iter_set_line(&line_iter, line);
-        while (!gtk_text_iter_ends_tag(&line_iter, color))
-        {
-            gtk_text_iter_forward_char(&line_iter);
-        }
-        const gchar *text = gtk_entry_get_text(GTK_ENTRY(edit_entry));
-        gtk_text_buffer_insert_with_tags(buffer, &line_iter, text, -1, time_spacing, NULL);
-        GtkTextIter *iditer = gtk_text_iter_copy(&line_iter);
-        gtk_text_iter_forward_line(iditer);
-        GtkTextIter *liditer = gtk_text_iter_copy(iditer);
-        GtkTextIter *riditer = gtk_text_iter_copy(iditer);
-        while (!gtk_text_iter_starts_tag(liditer, time_spacing))
-        {
-            gtk_text_iter_backward_char(liditer);
-        }
-        gchar *idtext = gtk_text_iter_get_text(liditer, riditer);
-        char *to_send = mx_strjoin("\r\r\r\r\r\r\v", idtext);
-        to_send = mx_strjoin(to_send, "\v");
-        to_send = mx_strjoin(to_send, text);
-        int sock = 0;
-        get_sockid(&sock, 0);
-        send(sock, to_send, mx_strlen(to_send), 0);
-        gtk_window_set_modal(GTK_WINDOW(edit_window), false);
-        gtk_widget_destroy(edit_window);
-    }
-    return false;
-}
-
-void edit_button_reader(const gchar *text, gint lineid)
-{
-    edit_window = gtk_window_new(GTK_WINDOW_POPUP);
-    new_window(edit_window, 400, -1, false, 0, "uchat");
-    gtk_window_set_modal(GTK_WINDOW(edit_window), true);
-    //GtkWidget *edit_label = gtk_label_new(text);
-    GtkWidget *edit_entry = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(edit_entry), text);
-    gint *line_id = &lineid;
-    g_signal_connect(G_OBJECT(edit_entry), "key-press-event", G_CALLBACK(ebr), (gpointer)line_id);
-    g_signal_connect(G_OBJECT(edit_window), "key-press-event", G_CALLBACK(is_esc), NULL);
-
-    GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start(GTK_BOX(hbox), edit_entry, false, false, 5);
-
-    gtk_container_add(GTK_CONTAINER(edit_window), hbox);
-    gtk_widget_show_all(edit_window);
-}
-
-void edit_message(gint lineid)
-{
-    GtkWidget *vbox = gtk_stack_get_visible_child(GTK_STACK(chat_stack));
-    GList *list1 = gtk_container_get_children(GTK_CONTAINER(vbox));
-    GtkContainer *scroll = GTK_CONTAINER(list1->next->data);
-    GList *list2 = gtk_container_get_children(GTK_CONTAINER(scroll));
-    GtkWidget *textArea = GTK_WIDGET(list2->data);
-
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
-    GtkTextTagTable *table = gtk_text_buffer_get_tag_table(buffer);
-    GtkTextTag *color = gtk_text_tag_table_lookup(table, "color");
-    GtkTextTag *above_below_pixels = gtk_text_tag_table_lookup(table, "above_below_pixels");
-    GtkTextIter line_iter;
-    GtkTextMark *cursor;
-    cursor = gtk_text_buffer_get_mark(buffer, "insert");
-    gtk_text_buffer_get_iter_at_mark(buffer, &line_iter, cursor);
-    gtk_text_iter_set_line(&line_iter, lineid);
-    //gtk_text_iter_forward_char(line_iter); //? placeholder
-    while (!gtk_text_iter_ends_tag(&line_iter, color))
-    {
-        gtk_text_iter_forward_char(&line_iter);
-    }
-    gtk_text_iter_forward_char(&line_iter);
-
-    GtkTextIter *liter;
-    liter = gtk_text_iter_copy(&line_iter);
-    GtkTextIter *riter;
-    riter = gtk_text_iter_copy(&line_iter);
-
-    while (!gtk_text_iter_ends_tag(riter, above_below_pixels))
-    {
-        gtk_text_iter_forward_char(riter);
-    }
-    gtk_text_iter_backward_char(liter);
-
-    const gchar *text = gtk_text_iter_get_text(liter, riter);
-    edit_button_reader(text, lineid);
-}
 
 gboolean show_message(gpointer message)
 {
@@ -183,7 +45,7 @@ gboolean show_message(gpointer message)
     return G_SOURCE_REMOVE;
 }
 
-int on_button_press(GtkWidget *widget, GdkEventButton *event)
+int on_button_press(GtkWidget *widget)
 {
     widget = NULL;
     GtkWidget *vbox = gtk_stack_get_visible_child(GTK_STACK(chat_stack));
@@ -193,28 +55,7 @@ int on_button_press(GtkWidget *widget, GdkEventButton *event)
     GtkWidget *textArea = GTK_WIDGET(list2->data);
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textArea));
 
-    if (event->type == GDK_2BUTTON_PRESS)
-    {
-        GtkTextIter iter;
-        GtkTextMark *cursor = gtk_text_buffer_get_mark(buffer, "insert");
-        gtk_text_buffer_get_iter_at_mark(buffer, &iter, cursor);
-        gint line_id = gtk_text_iter_get_line(&iter);
-        edit_message(line_id);
-
-        //gchar *text = gtk_text_buffer_get_text(buffer, &liter, &riter, false); //!
-        // gtk_text_buffer_insert(buffer, riter, "Test for replacement", strlen("Test for replacement"));
-
-        // gtk_text_buffer_get_iter_at_mark(buffer, liter, cursor);
-        // gtk_text_buffer_get_iter_at_mark(buffer, riter, cursor);
-        // gtk_text_iter_backward_line(liter);
-        // gtk_text_iter_forward_line(liter);
-        // gtk_text_iter_forward_line(riter);
-        // gtk_text_iter_backward_char(riter);
-        // gtk_text_iter_backward_chars(riter, strlen("Test for replacement"));
-
-        // gtk_text_buffer_delete(buffer, liter, &riter);
-    }
-    else if (current_roomname != gtk_stack_get_visible_child_name(GTK_STACK(chat_stack)))
+    if (current_roomname != gtk_stack_get_visible_child_name(GTK_STACK(chat_stack)))
     {
         gtk_text_buffer_set_text(buffer, "", -1);
 
@@ -253,9 +94,9 @@ void send_message(GtkWidget *text_entry, GtkTextView *textview)
     gtk_text_iter_forward_to_end(&iter);
     get_iter(&iter, 1); //!assign
     gtk_text_buffer_place_cursor(buffer, &iter);
-
-    auto_scroll();
+    gtk_entry_set_text(GTK_ENTRY(text_entry), "");
     usleep(2000);
+    auto_scroll();
 }
 
 int on_key_press(GtkWidget *text_entry, GdkEventKey *event, GtkTextView *textview)
@@ -267,17 +108,20 @@ int on_key_press(GtkWidget *text_entry, GdkEventKey *event, GtkTextView *textvie
     return false;
 }
 
-void send_message_btn(GtkWidget *text_entry, GtkTextView *textview)
+void send_message_btn(GtkWidget *button, GtkTextView *textview)
 {
-    GtkWidget *a = text_entry;
+    GtkWidget *a = button;
     a = NULL;
-    
     GtkWidget *vbox = gtk_stack_get_visible_child(GTK_STACK(chat_stack));
     GList *list1 = gtk_container_get_children(GTK_CONTAINER(vbox));
     GtkContainer *hbox = GTK_CONTAINER(list1->next->next->data);
     GList *list2 = gtk_container_get_children(GTK_CONTAINER(hbox));
     GtkWidget *textEntry = GTK_WIDGET(list2->data);
-    send_message(textEntry, textview);
+    gint len = gtk_entry_get_text_length(GTK_ENTRY(textEntry));
+    if (len > 0)
+    {
+        send_message(textEntry, textview);
+    }
 }
 
 GtkWidget *add_chat(GtkWidget **stack, char *text)
@@ -417,15 +261,6 @@ void *recvmg_new(void *my_sock)
                     g_source_unref(source);
                 }
             }
-        }
-        else if (msg[4] == '\r' && msg[5] != '\r')
-        {
-            char **splited = mx_strsplit(msg, '\v');
-            gchar *gtext = splited[1];
-            source = g_idle_source_new();
-            g_source_set_callback(source, local_edit_message, gtext, NULL); //! Naxyia id blyat togda
-            g_source_attach(source, context);
-            g_source_unref(source);
         }
 
         bzero(msg, 500);

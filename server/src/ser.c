@@ -136,6 +136,7 @@ void *recvmg(void *client_sock)
                             roomname = mx_strjoin(roomname, "\t"); // splitim po \t
                             roomname = mx_strjoin(roomname, *id_rooms);
                             send(sock, roomname, mx_strlen(roomname), 0);
+                            usleep(5000);
                         }
                         id_rooms++;
                     }
@@ -271,19 +272,6 @@ void *recvmg(void *client_sock)
                             usleep(500);
                         }
                         splited_users++;
-                    }
-                }
-            }
-            else if (msg[5] == '\r' && msg[6] != '\r') // 1 - id_mesage, 2 - new_text
-            {
-                add_newtext_into_mesage(db, splited_msg[2], splited_msg[1]);
-                char *send_users = get_usernames_from_rooms(db, mx_itoa(get_roomid_from_room_with_roomname(db, splited_msg[1])));
-                char **splited_users = mx_strsplit(send_users, '\v');
-                while (*splited_users != NULL)
-                {
-                    if (sock != get_sockid_from_db(db, *splited_users))
-                    {
-                        send(get_sockid_from_db(db, *splited_users), mx_strjoin("\r\r\r\r\r\v", splited_msg[1]), mx_strlen(mx_strjoin("\r\r\r\r\r\v", splited_msg[1])), 0);
                     }
                 }
             }
